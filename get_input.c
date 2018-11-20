@@ -55,7 +55,7 @@ int main(){
 
     if( temp == '\n') break;
 
-    else if ( temp == '.' || temp =='('|| temp ==')' || temp = '+'|| temp = '-'|| temp = '*'|| temp = '/' ){
+    else if ( temp == '.' || temp =='('|| temp ==')' || temp == '+'|| temp == '-'|| temp == '*'|| temp == '/' ){
 
       append(list,newnode(temp));
 
