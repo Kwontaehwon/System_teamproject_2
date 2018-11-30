@@ -284,14 +284,22 @@ int GreaterOpr(char opr1, char opr2)
 			return TRUE;
 		else if (opr2 == '*')
 			return TRUE;
+		else if (opr2 == '(')
+			return FALSE;
+		else if (opr2 == ')')
+			return FALSE;
 	
 	}
 	else if (opr1 == '+' || opr1 == '-'){
 		if (opr2 == '+' || opr2 == '-')
 			return TRUE;
-		else if(opr2 == '*')
+		else if ( opr2 == ')')
+			return FALSE;
+		else if(opr2 == '*'|| opr2 == '(')
 			return FALSE;
 	}
+	else if (opr1 == '(')
+		return FALSE;
 }
 
 void POP_all(DLL *stack,DLL *list_1)
@@ -327,16 +335,30 @@ void PushOrPop(DLL *stack, char input_opr, DLL *list_1)
 			while (bigyo->next != NULL)
 				bigyo = bigyo -> next;
 			if (GreaterOpr(bigyo->val,input_opr) == FALSE){
-				append(stack,newnode(input_opr));
-				stack->size+=1;
-				break;
+				if (input_opr != ')'){
+					append(stack,newnode(input_opr));
+					stack->size+=1;
+					break;
+				}
+				else {
+					while (bigyo->val!='(') {
+						append(list_1,newnode(bigyo->val));
+						bigyo=bigyo->prev;
+						bigyo->next = NULL;
+						stack->size -= 1;
+					}
+					if (stack->size==1) {
+						free(stack);
+						stack = newDLL();
+					}
+				}
 			}
 			else {
 				if (stack->size == 1) {
 					POP_all(stack,list_1);
 					append(stack,newnode(input_opr));
 					stack->size+=1;
-					break;
+					break;		
 				}
 				else if (stack->size >= 2) {
 					append(list_1,newnode(bigyo->val));
@@ -348,7 +370,8 @@ void PushOrPop(DLL *stack, char input_opr, DLL *list_1)
 		}
 	}
 }
-void postfix(DLL *list,DLL *list_1){
+
+void postfix(DLL *list,DLL *list_1){//후위표기법에 괄호가 남아 있음. 연산자들의 순서는 맞음.
   DLL *stack = newDLL(); // 연산자 담아둘 스택
   Node *curr = list -> head ;
   while(1){
