@@ -2,6 +2,9 @@
 #include<stdlib.h>
 #include<ctype.h>
 
+#define TRUE 1
+#define FALSE 0
+
 typedef struct Node{
   char val;
   struct Node *next;
@@ -34,6 +37,9 @@ void getnumber(DLL *list);
 void cal(DLL *list,DLL *stack_3);
 void plus(Node *curr_1, Node *curr_2,DLL *stack_3);
 void reverse(DLL *list, DLL *list_1);
+int GreaterOpr(char opr1, char opr2);
+void PushOrPop(DLL *stack, char input_opr, DLL *list_1);
+void POP_all(DLL *stack, DLL *list_1);
 
 int main(){
   DLL *list = newDLL(); // 입력을 받을 list
@@ -59,7 +65,7 @@ void cal(DLL *list,DLL *stack_3){ //reverse
   DLL *stack_1 = newDLL(); // 숫자1
   DLL *stack_2 = newDLL(); // 숫자2
   Node *curr = list -> head ;
-  while(1){ // + - 만날떄 까지 노드움직임
+  while(1){ // + - 만날?? 까지 노드움직임
     if( curr->val == '+' || curr->val == '-'){
       curr = curr->prev;
       curr = curr->prev;
@@ -239,7 +245,7 @@ void plus(Node *curr_1, Node *curr_2,DLL *stack_3){
             c = c - 10;
             count = 1;
           }
-          curr_1 = curr_1 ->prev;
+		  curr_1 = curr_1 ->prev;
           curr_2 = curr_2 ->prev;
         }
       }
@@ -271,6 +277,77 @@ void getnumber(DLL *list){
   }
 }
 
+int GreaterOpr(char opr1, char opr2)
+{
+	if(opr1 == '*') {
+		if (opr2 == '+' || opr2 == '-')
+			return TRUE;
+		else if (opr2 == '*')
+			return TRUE;
+	
+	}
+	else if (opr1 == '+' || opr1 == '-'){
+		if (opr2 == '+' || opr2 == '-')
+			return TRUE;
+		else if(opr2 == '*')
+			return FALSE;
+	}
+}
+
+void POP_all(DLL *stack,DLL *list_1)
+{
+  Node *cur = stack->head;
+  while(cur->next != NULL){
+		cur = cur->next;
+	}
+  while(1){
+    if( cur -> prev == NULL){
+      append(list_1, newnode(cur->val));
+      break;
+    }
+    else{
+      append(list_1, newnode(cur->val));
+      cur = cur->prev;
+    }
+  }
+  free(stack);
+  stack = newDLL();
+}
+
+void PushOrPop(DLL *stack, char input_opr, DLL *list_1)
+{
+	while (1) {
+		if (stack->size == 0) {
+			append(stack,newnode(input_opr));
+			stack->size+=1;
+			break;
+		}
+		else {
+			Node *bigyo = stack->head;
+			while (bigyo->next != NULL)
+				bigyo = bigyo -> next;
+			if (GreaterOpr(bigyo->val,input_opr) == FALSE){
+				append(stack,newnode(input_opr));
+				stack->size+=1;
+				break;
+			}
+			else {
+				if (stack->size == 1) {
+					POP_all(stack,list_1);
+					append(stack,newnode(input_opr));
+					stack->size+=1;
+					break;
+				}
+				else if (stack->size >= 2) {
+					append(list_1,newnode(bigyo->val));
+					bigyo=bigyo->prev;
+					bigyo->next = NULL;
+					stack->size -= 1;
+				}
+			}
+		}
+	}
+}
 void postfix(DLL *list,DLL *list_1){
   DLL *stack = newDLL(); // 연산자 담아둘 스택
   Node *curr = list -> head ;
@@ -287,24 +364,11 @@ void postfix(DLL *list,DLL *list_1){
     }
     else{  // 연산자들
       append(list_1,newnode(' '));
-      append(stack,newnode(curr->val));
-      curr = curr ->next;
+      PushOrPop(stack, curr->val, list_1);
+	  curr = curr -> next;
+	  }
     }
-  }
-  Node *cur = stack->head;
-  while(cur->next != NULL){
-		cur = cur->next;
-	}
-  while(1){
-    if( cur -> prev == NULL){
-      append(list_1, newnode(cur->val));
-      break;
-    }
-    else{
-      append(list_1, newnode(cur->val));
-      cur = cur->prev;
-    }
-  }
+  POP_all(stack,list_1);
 }
 
 void reverse(DLL *list, DLL *list_1){ //
@@ -341,10 +405,10 @@ void append(DLL *list,Node *newnode){
   }
 }
 
-void print(DLL *list){
-  Node *curr = list->head;
-  while(curr != NULL){
-    printf("%c",curr->val);
-    curr = curr -> next;
-  }
+void print(DLL *list) {
+	Node *curr = list->head;
+	while (curr != NULL) {
+		printf("%c",curr->val);
+		curr = curr->next;
+	}
 }
