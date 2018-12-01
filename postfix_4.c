@@ -40,15 +40,18 @@ void postfix(DLL *list,DLL *list_1);
 void getnumber(DLL *list);
 void cal(DLL *list,DLL *stack_3);
 void reverse(DLL *list, DLL *list_1);
+
 int GreaterOpr(char opr1, char opr2);
-void POP_part(DLL *stack, DLL *list_1);
 void POP_all(DLL *stack, DLL *list_1);
+void PushOrPop(DLL *stack, char input_opr, DLL *list_1);
+
 void insert(DLL *list_1,DLL *list_3);
 void zero(DLL *stack_1, DLL *stack_2 ); // 소수점의 자릿수를 맞춰주는 함수
 void insertAt(DLL *stack_3, int index, Node *newnode); // 소수점 삽입을 위한 함수
 int insertAt_int(DLL *stack_3, int index, Node *newnode); // 자연수 부분에 0을 삽입하기 위한 함수
 void copy_1(DLL *list_1 , DLL *list_3);
 void free_1(DLL *list_1);
+
 
 int main(){
   DLL *list = newDLL(); // 입력을 받을 list
@@ -57,31 +60,44 @@ int main(){
   DLL *list_1 = newDLL(); //후위표기법으로 바뀐값을 넣어줄 list_1
   postfix(list,list_1);  // 후위표기법으로 바뀐 list_1
   print(list_1);
+
+  /*
   DLL *list_2 = newDLL(); // 계산할 값을 넣어줄 list_2
   printf("\n");
-  cal(list_1,list_2);  // 계산된 list_2
   DLL *list_3 = newDLL();
+  cal(list_1,list_2);  // 계산된 list_2
   reverse(list_2,list_3);
   printf("\nanswer\n");
   print(list_3);
 
+  insert(list_1,list_3);
+  printf("\ncombine\n");
+  print(list_3);
+  */
+
+  /* copy_1 함수 구현
+  copy_1(list_2,list_1);
+  printf("\nlist_2\n");
+  print(list_2);
+  */
 
   /*
-  printf("\n");
-  insert(list_1,list_3); //list _3 에 저장
-  list_1 -> head = NULL;
-  list_1 -> head = list_3->head; //copy함수 사용
-  list_3 -> head = NULL;
-  list_2 -> head = NULL;
+  free_1(list_1);
+  free_1(list_2);
+  copy_1(list_1,list_3);
+  free_1(list_3);
+  printf("\nanswer\n");
   print(list_1);
+  */
+
   //// 두번쨰 계산
+  /*
   printf("\nsecond\n");
   cal(list_1,list_2); // cal이문제임
   printf("\ncal play\n");
   reverse(list_2,list_3);
   print(list_2);
   */
-
 
 
 
@@ -116,7 +132,7 @@ void copy_1(DLL *list_1 , DLL *list_3){ //아예 비워진 list_1 에 list_3에 
   }
 }
 
-void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점의 자릿수를 맞춰줌.
+void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수를 맞춰줌.
   Node *curr = stack_1 ->head;
   Node *curr_1 = stack_2 ->head;
   int a = 0 ; // 소수점 자릿수 저장
@@ -217,7 +233,7 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점의 자릿수를 맞춰줌.
 
 }
 
-void insert(DLL *list_1,DLL *list_3){ // 계산된 DLL을 원래 있던 후위표기법 식이랑 합쳐줌
+void insert(DLL *list_1,DLL *list_3){ // 계산된 DLL에 원래 있던 후위표기법 식이랑 합침
   append(list_3,newnode(' '));
   Node *curr = list_1->head ;
   Node *curr_1 = list_3->head ;
@@ -461,17 +477,39 @@ void POP_all(DLL *stack,DLL *list_1)
   stack = newDLL();
 }
 
-void POP_part(DLL *stack, DLL *list_1)
+void PushOrPop(DLL *stack, char input_opr, DLL *list_1)
 {
-	Node *cur = stack->head;
-	while(cur->next != NULL) {
-		cur = cur -> next;
+	while (1) {
+		if (stack->size == 0) {
+			append(stack,newnode(input_opr));
+			stack->size+=1;
+			break;
+		}
+		else {
+			Node *bigyo = stack->head;
+			while (bigyo->next != NULL)
+				bigyo = bigyo -> next;
+			if (GreaterOpr(bigyo->val,input_opr) == FALSE){
+				append(stack,newnode(input_opr));
+				stack->size+=1;
+				break;
+			}
+			else {
+				if (stack->size == 1) {
+					POP_all(stack,list_1);
+					append(stack,newnode(input_opr));
+					stack->size+=1;
+					break;
+				}
+				else if (stack->size >= 2) {
+					append(list_1,newnode(bigyo->val));
+					bigyo=bigyo->prev;
+					bigyo->next = NULL;
+					stack->size -= 1;
+				}
+			}
+		}
 	}
-	append(list_1, newnode(cur->val));
-	Node *prev = cur->prev;
-	free(cur);
-	prev->next= NULL;
-	stack->size -= 1;
 }
 
 void postfix(DLL *list,DLL *list_1){
@@ -490,31 +528,10 @@ void postfix(DLL *list,DLL *list_1){
     }
     else{  // 연산자들
       append(list_1,newnode(' '));
-      if (stack -> size == 0){
-		  append(stack,newnode(curr->val));
-		  stack -> size += 1;
-		  curr = curr->next;
-	  }
-	  else{
-		  Node *head = stack->head;
-		  while (head -> next != NULL)
-			  head = head -> next;
-		  if (GreaterOpr(stack->head->val,curr->val)){
-		  	POP_all(stack,list_1);
-			append(stack,newnode(curr->val));
-			stack->size += 1;
-			curr = curr->next;
-		  }
-		  else {
-			  append(stack,newnode(curr->val));
-			  stack->size += 1;
-			  curr = curr->next;
-		  }
-
+      PushOrPop(stack, curr->val, list_1);
+	  curr = curr -> next;
 	  }
     }
-  }
-
   POP_all(stack,list_1);
 }
 
