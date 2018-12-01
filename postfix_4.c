@@ -16,6 +16,7 @@ typedef struct {
   int size;
   int size_1; //소수점 자리수 저장
   int size_2; //자연수 자리수 저장
+  //int size_3; // delete_all 함수쓸때 쓰는 함수
 } DLL;
 
 Node *newnode(char c){
@@ -50,8 +51,11 @@ void zero(DLL *stack_1, DLL *stack_2 ); // 소수점의 자릿수를 맞춰주�
 void insertAt(DLL *stack_3, int index, Node *newnode); // 소수점 삽입을 위한 함수
 int insertAt_int(DLL *stack_3, int index, Node *newnode); // 자연수 부분에 0을 삽입하기 위한 함수
 void copy_1(DLL *list_1 , DLL *list_3);
-void free_1(DLL *list_1);
 
+int deleteAt(DLL *list, int index);
+void delete_all(DLL *list1);
+
+void DEL_DLL(DLL *list_1);
 
 int main(){
   DLL *list = newDLL(); // 입력을 받을 list
@@ -65,22 +69,27 @@ int main(){
   DLL *list_2 = newDLL(); // 계산할 값을 넣어줄 list_2
   printf("\n");
   DLL *list_3 = newDLL();
+  DLL *list_4 = newDLL();
   cal(list_1,list_2);  // 계산된 list_2
   reverse(list_2,list_3);
-  printf("\nanswer\n");
-  print(list_3);
 
+  printf("\nanswer\n");
+  delete_all(list_1);
+  print(list_3);
+  */
+
+  /*
+  copy_1(list_1,list_3);
+  printf("\nlist_1\n");
+  print(list_1);
+  */
+
+
+  /*
   insert(list_1,list_3);
   printf("\ncombine\n");
   print(list_3);
   */
-
-  /* copy_1 함수 구현
-  copy_1(list_2,list_1);
-  printf("\nlist_2\n");
-  print(list_2);
-  */
-
   /*
   free_1(list_1);
   free_1(list_2);
@@ -104,21 +113,13 @@ int main(){
 
 }
 
-void free_1(DLL *list_1){
-  Node *curr = list_1 ->head;
-  while(1){
-    if (curr ->next == NULL){
-      free(curr);
-      break;
-    }
-    else{
-      free(curr);
-      curr = curr->next;
-    }
-  }
+void delete_all(DLL *list1){
+  int a = list1->size;
+  for(int i=0; i<a;i++)
+    deleteAt(list1,0);
 }
 
-void copy_1(DLL *list_1 , DLL *list_3){ //아예 비워진 list_1 에 list_3에 값을 넣어줘야됌
+void copy_1(DLL *list_1 , DLL *list_3){ // list_1 에 list_3에 값을 복사해줌.
   Node *curr = list_3 -> head;
   while(1){
     if (curr ->next == NULL){
@@ -135,6 +136,7 @@ void copy_1(DLL *list_1 , DLL *list_3){ //아예 비워진 list_1 에 list_3에 
 void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수를 맞춰줌.
   Node *curr = stack_1 ->head;
   Node *curr_1 = stack_2 ->head;
+  DLL *stack_3 = newDLL(); // 임시로 값을 저장해둘 DLL ,무조건 stack_1이 큰수 이게
   int a = 0 ; // 소수점 자릿수 저장
   int b = 0 ; // 소수점 자릿수 저장
   int c = 0 ; // 자연수 자릿수 저장
@@ -168,7 +170,6 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
       curr_1 = curr_1 -> next;
     }
   }
-
   while(1){
     if (curr_1->next == NULL) break;
     else {
@@ -180,34 +181,34 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
   printf("\na : %d b : %d\n",a,b);
   printf("\nc : %d d : %d\n",c,d);
   //////////////////
-  if ( a == 0 ) {
+  stack_1 -> size_2 = c; // 자연수 자릿수 저장
+  stack_2 -> size_2 = d;
+  if ( a == 0 && b != 0) {
     append(stack_1,newnode('.'));
   }
-  if ( b == 0 ) append(stack_2,newnode('.'));
+  if ( b == 0 && a != 0 ) append(stack_2,newnode('.'));
   if ( c > d ){ // 앞수의 자연수 자리가 더 큰경우
     int f = c-d ; //0을 몇개를 넣을 것인가?
-    stack_1 -> size_2 = f;
-    stack_2 -> size_2 = f;
-    printf("\nf : %d\n",f);
+    //printf("\nf : %d\n",f);
     for (int i = 0 ; i < f ; i++){
       insertAt_int(stack_2,0,newnode('0'));
     }
-    stack_1 -> size_2 = c;
-    stack_2 -> size_2 = c;
+    //stack_1 -> size_2 = c;
+    //stack_2 -> size_2 = d;
   }
   else if ( d > c ) { //뒷수의 자연수 자리가 더 큰 경우
     int f = d - c;
-    stack_1 -> size_2 = f;
-    stack_2 -> size_2 = f;
+    //stack_1 -> size_2 = c;
+    //stack_2 -> size_2 = d;
     for (int i = 0 ; i < f ; i++ ){
       insertAt_int(stack_1,0,newnode('0'));
     }
-    stack_1 -> size_2 = d;
-    stack_2 -> size_2 = d;
+    //stack_1 -> size_2 = c;
+    //stack_2 -> size_2 = d;
   }
   else{
-    stack_1 -> size_2 = c;
-    stack_2 -> size_2 = d;
+    //stack_1 -> size_2 = c;
+    //stack_2 -> size_2 = d;
   }
 
   if( a > b){
@@ -231,6 +232,28 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
     stack_1 -> size_1 = b;
   }
 
+  if ( c < d){ // 뒷수가 더 큰수 일때
+    printf("\nthis play1\n");
+    copy_1(stack_3,stack_1);
+    delete_all(stack_1);
+    copy_1(stack_1,stack_2);
+    delete_all(stack_2);
+    copy_1(stack_2,stack_3);
+    delete_all(stack_3);
+  }
+  else if ( c == d){
+    int m = stack_1 -> head -> val -48;
+    int n = stack_2 -> head -> val -48;
+    if( n > m ){
+      printf("\nthis play2\n");
+      copy_1(stack_3,stack_1);
+      delete_all(stack_1);
+      copy_1(stack_1,stack_2);
+      delete_all(stack_2);
+      copy_1(stack_2,stack_3);
+      delete_all(stack_3);
+    }
+  }
 }
 
 void insert(DLL *list_1,DLL *list_3){ // 계산된 DLL에 원래 있던 후위표기법 식이랑 합침
@@ -321,6 +344,9 @@ void cal(DLL *list,DLL *stack_3){ //reverse
   printf("\n");
   print(stack_2);
   printf("\n");
+  printf("\nint number\n");
+  printf("c : %d d : %d\n",stack_1->size_2,stack_2->size_2); //
+
 
   while(1){ // +나 - 만날때 까지 노드움직임
     if (curr ->val == '+' || curr->val =='-' || curr->val == '*'){
@@ -410,12 +436,59 @@ void cal(DLL *list,DLL *stack_3){ //reverse
          break;
         }
       } // while문
-
       int d = stack_1 ->size_1;
       //printf("\nd : %d\n",d);
       if ( d > 0) insertAt(stack_3,d,newnode('.'));
-
     } // if +문에 걸림
+
+    /*
+    마이너스
+    */
+else if( curr ->val == '-' ){
+     Node *curr_1 = stack_1 ->head;
+     Node *curr_2 = stack_2 ->head;
+   while(1){ // 노드 끝까지 보냄
+     if (curr_1->next == NULL) break;
+     else curr_1 = curr_1 ->next;
+   }
+   while(1){ // 노드 끝까지 보냄
+     if (curr_2->next == NULL) break;
+     else curr_2 = curr_2 ->next;
+   }
+     int count = 0 ;
+     int a = curr_1 -> val - 48 ;
+     int b = curr_2 -> val - 48 ;
+     int c ;
+   while(1){
+     if ( curr_1 ->val == '.') {
+       curr_1 = curr_1 -> prev;
+     }
+     if ( curr_2 -> val == '.') {
+       curr_2 = curr_2 -> prev;
+     }
+     a = curr_1 -> val - 48 ;
+     b = curr_2 -> val - 48 ;
+     c = a-b;
+     if (count == 1){
+       c--;
+       count = 0;
+     }
+     if (c< 0){
+       c = c+10;
+       count = 1;
+     }
+     if ( curr_1 != NULL) curr_1 = curr_1 ->prev;
+     if ( curr_2 != NULL) curr_2 = curr_2 ->prev;
+     c = c + 48;
+     append(stack_3,newnode(c));
+     if ( curr_1 == NULL && curr_2 == NULL){
+         break;
+        }
+     }
+   int d = stack_1 ->size_1;
+     //printf("\nd : %d\n",d);
+     if ( d > 0) insertAt(stack_3,d,newnode('.'));
+   }
 }
 
 void getnumber(DLL *list){
@@ -533,6 +606,7 @@ void postfix(DLL *list,DLL *list_1){
 	  }
     }
   POP_all(stack,list_1);
+  DEL_DLL(list_1);
 }
 
 void reverse(DLL *list, DLL *list_1){ //
@@ -553,7 +627,6 @@ void reverse(DLL *list, DLL *list_1){ //
   }
 }
 
-
 void append(DLL *list,Node *newnode){
   Node *curr ;
   if(list->head == NULL){
@@ -561,12 +634,13 @@ void append(DLL *list,Node *newnode){
   }
   else{
     curr = list->head;
-    while ( curr ->next != NULL){
+    while (curr ->next != NULL){
       curr = curr->next;
     }
     newnode->prev = curr;
     curr->next = newnode;
   }
+  list->size = list->size + 1;
 }
 
 void print(DLL *list) {
@@ -623,4 +697,53 @@ void insertAt(DLL *stack_3, int index, Node *newnode){ // 소수점 삽입을 �
 	newnode->next = curr->next ;
   curr->next->prev = newnode;
 	curr->next = newnode;
+}
+
+int deleteAt(DLL *list, int index){
+   Node *curr = list->head;
+   int count = 0;
+   if(list->size >1){
+   if (index == 0){
+      list->head->next->prev = NULL;
+      list ->head = list->head->next;
+      list -> size = list -> size - 1;
+      return 0;
+   }
+   while(count != index){
+      count++;
+      curr = curr->next;
+      if(curr == NULL ) {
+         printf("DELETE ERROR: Out of Bound.\n");
+         return 0;
+      }
+   }
+   if(count == index){
+      if(curr->next == NULL){
+         curr->prev->next = NULL;
+         list -> size = list -> size - 1;
+         return 0;
+      }
+      curr->prev->next = curr->next;
+      curr->next->prev = curr->prev;
+      list -> size = list -> size - 1;
+   }
+ }
+ else{
+  list->size = list-> size - 1;
+  list->head->prev = NULL;
+  list->head->next = NULL;
+  list->head = NULL;
+  }
+}
+
+void DEL_DLL(DLL *list_1) {
+/*	Node *head = stack->head;
+	while (head != NULL) {
+		if (head -> val == '(' || head -> val == ')')
+		{
+			Node *prev = head -> prev;
+			Node *next = head -> next;
+		}
+		head = head-> next;
+	}*/
 }
