@@ -51,6 +51,7 @@ int deleteAt(DLL *list, int index);
 void delete_all(DLL *list1);
 void DEL_DLL(DLL *list_1);
 void plus_change(DLL *list_1);
+void size_check(DLL *list_1);
 
  int main(){
   DLL *list = newDLL(); // 입력을 받을 list
@@ -58,22 +59,29 @@ void plus_change(DLL *list_1);
   int a = list->i ;
   DLL *list_1 = newDLL(); //후위표기법으로 바뀐값을 넣어줄 list_1
   postfix(list,list_1);  // 후위표기법으로 바뀐 list_1
+  //printf("\n");
+  //print(list_1);
+  //printf("\n");
   DLL *list_2 = newDLL(); // 계산할 값을 넣어줄 list_2
   DLL *list_3 = newDLL();
   DLL *list_4 = newDLL();
   cal(list_1,list_2);  // 계산된 list_2
   reverse(list_2,list_3);
-
+  //printf("\n");
+  //print(list_3);
+  //printf("\n");
   for (int i = 1 ; i < a; i++){
     insert(list_1,list_3);
+    size_check(list_1);
     delete_all(list_1);
     copy_1(list_1,list_3);
-    //printf("\n");
-    //print(list_1);
-    //printf("\n");
     plus_change(list_1);
     //print(list_1);
+    //printf("\nlist_1 -> swh : %d\n",list_1 -> swh);
+    //print(list_1);
     //printf("\nlist_1->swh: %d",list_1 -> swh);
+    size_check(list_3);
+    size_check(list_2);
     delete_all(list_3);
     delete_all(list_2);
     cal(list_1,list_2);
@@ -83,22 +91,39 @@ void plus_change(DLL *list_1);
   print(list_3);
  }
 
+void size_check(DLL *list_1){
+  Node *curr = list_1-> head;
+  list_1 -> size = 0 ;
+  while(1){
+    if (curr -> next == NULL){
+      list_1 -> size = list_1 ->size + 1 ;
+      break;
+    }
+    else {
+      list_1 -> size = list_1 -> size + 1 ;
+      curr = curr->next;
+    }
+  }
+}
+
 void plus_change(DLL *list_1){ // 앞의수가 -일경우 뒤에있는 +를 -로 바꿔주기 위한 함수
   Node *curr = list_1 -> head;
-  if( list_1->head->val == '-'){
+  if( curr->val == '-'){
     while(1){
       if (curr -> next == NULL) break;
         curr = curr->next;
-      if (curr -> val == '+'){
+      if (curr -> val == '+'){ // -3+5인 경우
         curr -> val = '-';
         list_1 -> swh = 2;
         deleteAt(list_1,0);
         break;
       }
       else if(curr -> val == '-'){
+          //printf("\nplus_chage\n");
           curr -> val = '+';
+          //printf("\ncurr -> val : %c\n",curr->val);
           deleteAt(list_1,0);
-          list_1 -> swh = 2;
+          list_1 -> swh = 1;
           break;
       }
 
@@ -224,17 +249,29 @@ void plus_change(DLL *list_1){ // 앞의수가 -일경우 뒤에있는 +를 -로
     stack_2 -> swh = 1;
   }
   else if ( c == d){
-    int m = stack_1 -> head -> val -48;
-    int n = stack_2 -> head -> val -48;
-    if( n > m ){
-      copy_1(stack_3,stack_1);
-      delete_all(stack_1);
-      copy_1(stack_1,stack_2);
-      delete_all(stack_2);
-      copy_1(stack_2,stack_3);
-      delete_all(stack_3);
-      stack_1 -> swh = 1;
-      stack_2 -> swh = 1;
+    Node *curr_2 = stack_1 -> head;
+    Node *curr_3 = stack_2 -> head;
+    while(1){
+      int m = curr_2 -> val -48;
+      int n = curr_3 -> val -48;
+      if (curr_2 ->val == '.' && curr_3 -> val =='.') {
+        curr_2 = curr_2 -> next;
+        curr_3 = curr_3 -> next;
+      }
+      if( n > m ){
+        copy_1(stack_3,stack_1);
+        delete_all(stack_1);
+        copy_1(stack_1,stack_2);
+        delete_all(stack_2);
+        copy_1(stack_2,stack_3);
+        delete_all(stack_3);
+        stack_1 -> swh = 1;
+        stack_2 -> swh = 1;
+        break;
+      }
+      if ( curr_2 -> next == NULL && curr_3 -> next ==NULL) break;
+      curr_2 = curr_2 ->next;
+      curr_3 = curr_3 ->next;
     }
   }
 }
@@ -266,7 +303,7 @@ void plus_change(DLL *list_1){ // 앞의수가 -일경우 뒤에있는 +를 -로
   }
 }
 
- void cal(DLL *list,DLL *stack_3){
+ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법을 바뀐식 stack_3는 답을 저장할 리스트
   DLL *stack_1 = newDLL(); // 숫자1
   DLL *stack_2 = newDLL(); // 숫자2
   Node *curr = list -> head ;
@@ -332,6 +369,13 @@ void plus_change(DLL *list_1){ // 앞의수가 -일경우 뒤에있는 +를 -로
     //printf("\nplay");
     stack_1-> swh = 2;
     stack_2 -> swh = 2;
+    list -> swh = 0;
+  }
+  if ( list -> swh == 1){
+    //printf("\nplay3\n");
+    stack_1-> swh = 1;
+    stack_2 -> swh = 1;
+    list -> swh = 0;
   }
   //printf("\nswh : %d\n",stack_1->swh);
   /*
@@ -417,7 +461,11 @@ void plus_change(DLL *list_1){ // 앞의수가 -일경우 뒤에있는 +를 -로
       } // while문
       int d = stack_1 ->size_1;
       if ( d > 0) insertAt(stack_3,d,newnode('.'));
-
+      if ( stack_1 -> swh == 1 ) stack_3 -> swh = stack_1 -> swh;
+      if ( stack_3 -> swh == 1) append(stack_3,newnode('-'));
+      stack_1 ->swh = 0;
+      stack_2 ->swh = 0;
+      stack_3 ->swh = 0;
     } // if +문에 걸림
 
   //// -계산
@@ -464,6 +512,7 @@ void plus_change(DLL *list_1){ // 앞의수가 -일경우 뒤에있는 +를 -로
      }
      int d = stack_1 ->size_1;
      stack_3 -> swh = stack_1 -> swh;
+     //printf("\n stack_3 -> swh : %d\n",stack_3 -> swh);
      //printf("\nd : %d\n",d);
      if ( d > 0) insertAt(stack_3,d,newnode('.'));
      Node *curr_3 = stack_3 -> head;
@@ -485,6 +534,8 @@ void plus_change(DLL *list_1){ // 앞의수가 -일경우 뒤에있는 +를 -로
      stack_2 ->swh = 0;
      stack_3 ->swh = 0;
    }
+
+
 }
  void getnumber(DLL *list){ // 처음부터 -2+5가 들어오는 경우는 생각하지말자
   while(1){
