@@ -565,6 +565,7 @@ void insert(DLL *list_1,DLL *list_3){ // 계산된 DLL에 원래 있던 후위�
 		if ( temp == '*') {
 			temp = getc(ifp);
 			count++;
+		//  swh 필요할 수도 있음.
 		}
       }
       if (temp == '+' || temp == '-' || temp == '*') list->i = list->i + 1; // 추가한 부분
@@ -635,15 +636,15 @@ void insert(DLL *list_1,DLL *list_3){ // 계산된 DLL에 원래 있던 후위�
 	}
   while(1){
     if( cur -> prev == NULL){
-      append(list_1, newnode(cur->val));
-	  append(list_1,newnode(' '));
-	  break;
+      	append(list_1, newnode(cur->val));
+	  	append(list_1,newnode(' '));
+	  	break;
     }
     else{
       append(list_1, newnode(cur->val));
 	  append(list_1,newnode(' '));
       cur = cur->prev;
-    }
+	}
   }
   free(stack);
   stack = newDLL();
@@ -743,7 +744,8 @@ void postfix(DLL *list,DLL *list_1){
 	  }
 	}
   }
-  POP_all(stack,list_1);
+  if (stack -> ssize >= 1)
+  	POP_all(stack,list_1);
 }
 void reverse(DLL *list, DLL *list_1){ //
   Node *curr = list->head;
