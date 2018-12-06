@@ -36,7 +36,6 @@ DLL *newDLL(){
   return temp;
 }
 
-void delete_not_need_par(DLL *list); // 필요없는 괄호를 없애주는 함수
 void G_POP(DLL *stack, DLL *list_1);
 void stack_append(DLL *list, Node *newnode);
 void append(DLL *list, Node *newnode);
@@ -637,10 +636,12 @@ void insert(DLL *list_1,DLL *list_3){ // 계산된 DLL에 원래 있던 후위�
   while(1){
     if( cur -> prev == NULL){
       append(list_1, newnode(cur->val));
-      break;
+	  append(list_1,newnode(' '));
+	  break;
     }
     else{
       append(list_1, newnode(cur->val));
+	  append(list_1,newnode(' '));
       cur = cur->prev;
     }
   }
@@ -653,7 +654,9 @@ void G_POP(DLL *stack, DLL*list_1)
 	while (end -> next != NULL)
 		end = end -> next;
 	while (end -> val != '(') {
-		append(list_1, newnode(end -> val));
+		append(list_1,newnode(end->val));
+		if (end->prev->val != '(')
+			append(list_1,newnode(' '));
 		end = end -> prev;
 		end -> next = NULL;
 		stack->ssize -= 1;
@@ -692,6 +695,7 @@ void G_POP(DLL *stack, DLL*list_1)
 				}
 				else if (ssize >= 2) {
 					append(list_1,newnode(bigyo->val));
+					append(list_1,newnode(' '));
 					bigyo=bigyo->prev;
 					bigyo->next = NULL;
 					stack ->ssize -= 1;
@@ -707,11 +711,13 @@ void postfix(DLL *list,DLL *list_1){
     if( curr -> next == NULL){
 	  if (isdigit(curr->val)) {//마지막숫자 일 경우
     	  append(list_1,newnode(curr->val));
-      	  append(list_1,newnode(' '));
+		  append(list_1,newnode(' '));
      	  break;
 	  }
 	  else if (curr->val == ')') {
+		  append(list_1, newnode(' '));
 		  G_POP(stack,list_1);
+		  append(list_1,newnode(' '));
 		  break;
 	  }
     }
@@ -721,15 +727,22 @@ void postfix(DLL *list,DLL *list_1){
       curr = curr -> next;
     }
 	else if (curr -> val == ')') {
+		append(list_1, newnode(' '));
 		G_POP(stack,list_1);
 		curr = curr -> next;
 	}
-    else{  // 연산자들
-      append(list_1,newnode(' '));
-      PushOrPop(stack, curr->val, list_1);
-	  curr = curr -> next;
+    else{//연산자들
+	  if (curr->val == '(') {
+		  PushOrPop(stack, curr->val, list_1);
+		  curr = curr -> next;
 	  }
-    }
+	  else {
+		  append(list_1,newnode(' '));
+    	  PushOrPop(stack, curr->val, list_1);
+		  curr = curr -> next;
+	  }
+	}
+  }
   POP_all(stack,list_1);
 }
 void reverse(DLL *list, DLL *list_1){ //
