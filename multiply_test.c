@@ -74,12 +74,12 @@ int main(){
     //printf("\nplay1\n");
     plus_change(list_1);
   }
-  printf("\nlist_1\n");
-  print(list_1);
+  //printf("\nlist_1\n");
+  //print(list_1);
   cal(list_1,list_2);  // 계산된 list_2
-  printf("\nlist_3\n");
+  //printf("\nlist_3\n");
   reverse(list_2,list_3);
-  print(list_3);
+  //print(list_3);
   /*
   printf("\ninsert before list_1\n");
   print(list_1);
@@ -90,7 +90,6 @@ int main(){
   */
   //printf("\nlist_3\n");
   //print(list_3);
-
   ///////
 
 
@@ -476,10 +475,12 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법을 바뀐식 stack_
   }
 
   zero(stack_1,stack_2);
+  /*
   printf("\nstack_1,stack_2 \n");
   print(stack_1);
   printf("\n");
   print(stack_2);
+  */
   //printf("\n size_1 : %d , size_1 : %d", stack_1->size_1,stack_2->size_1);
 
   if ( list -> swh == 2){
