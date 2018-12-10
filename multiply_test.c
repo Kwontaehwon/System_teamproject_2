@@ -10,11 +10,11 @@
 }Node;
  typedef struct {
   Node *head;
-  int ssize;//스택의 길이
-  int size;
+  int ssize;//스택의 길이(postfix용)
+  int size; //연결리스트의 전체크기
   int size_1; //소수점 자리수 저장
   int size_2; //자연수 자리수 저장
-  int swh ; // stack_3의 부호 표시를 위한 switch
+  int swh ; // 여러가지 경우를 처리해주기위한 switch 넘버
   int i; // 연산자의 갯수
 }DLL;
  Node *newnode(char c){
@@ -42,19 +42,19 @@ void append(DLL *list, Node *newnode);
 void print(DLL *list);
 void postfix(DLL *list,DLL *list_1);
 void getnumber(DLL *list);
-void cal(DLL *list,DLL *stack_3);
-void reverse(DLL *list, DLL *list_1);
+void cal(DLL *list,DLL *stack_3);//기본적인 계산을 해주는 메인함수
+void reverse(DLL *list, DLL *list_1);// 노드의 값을 반대로 다시 넣어주는 함수
 int GreaterOpr(char opr1, char opr2);
 void POP_all(DLL *stack, DLL *list_1);
 void PushOrPop(DLL *stack, char input_opr, DLL *list_1);
 void insert(DLL *list_1,DLL *list_3); // 계산한값과 기존에 있던 식을 합쳐주는 함수
 void zero(DLL *stack_1, DLL *stack_2 ); // 소수점의 자릿수를 맞춰주는 함수
-int insertAt(DLL *stack_3, int index, Node *newnode);
+int insertAt(DLL *stack_3, int index, Node *newnode); // 특정 index에 노드를 삽입하는 함수
 int insertAt_int(DLL *stack_3, int index, Node *newnode); // 자연수 부분에 0을 삽입하기 위한 함수
-void copy_1(DLL *list_1 , DLL *list_3);
+void copy_1(DLL *list_1 , DLL *list_3); //list_1에 list_3의 노드를 복사해주는 함수
 int deleteAt(DLL *list, int index);
-void delete_all(DLL *list1);
-void plus_change(DLL *list_1);
+void delete_all(DLL *list1);// 노드를 전체 비워주는 함수
+void plus_change(DLL *list_1);// -3 5+ 인경우를 처리해주는 함수 -> 3 5 - 로 바꿔줌, 그리고 list_1->swh 의 값을 바꿔줌
 void size_check(DLL *list_1); // 총 길이를 재주는 함수
 void plus_zero(DLL *list_3 ); // .1 -.1 인경우 .앞에 0을 추가해주는 함수
 void write(DLL* list, FILE *ofp);
@@ -300,7 +300,7 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
     }
   }
 }
-void insert(DLL *list_1,DLL *list_3){ // 계산된 DLL에 원래 있던 후위표기법 식이랑 합침
+void insert(DLL *list_1,DLL *list_3){ // 계산된 값을  원래 있던 후위표기법 식이랑 합침
   Node *curr = list_1->head ;
   Node *curr_1 = list_3->head ;
   int count = 0 ; // list_1의 총길이
@@ -402,7 +402,7 @@ void insert(DLL *list_1,DLL *list_3){ // 계산된 DLL에 원래 있던 후위�
 
   //printf("\ncount : %d count_1 : %d\n",count,count_1);
 }
-void cal(DLL *list,DLL *stack_3){ // list는 후위표기법을 바뀐식 stack_3는 답을 저장할 리스트
+void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,stack_3는 답을 저장할 리스트
   DLL *stack_1 = newDLL(); // 숫자1
   DLL *stack_2 = newDLL(); // 숫자2
   Node *curr = list -> head ;
@@ -483,27 +483,41 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법을 바뀐식 stack_
   */
   //printf("\n size_1 : %d , size_1 : %d", stack_1->size_1,stack_2->size_1);
 
+  if(list->swh != 0 )
+  {
+    int temp = list->swh;
+    stack_1 -> swh = temp ;
+    stack_2 -> swh = temp ;
+    list->swh = 0;
+  }
+  //swh = 1 일떄, zero함수에서 stack_1 과 stack_2 가 스왑되었다는 상태, stack_2의 값이 더크기때문
+  //swh = 2 일때, 처음입력받을때 맨앞수에 -가있는 상태  ex) -3+5
+  //swh = 3 일떄, - - 끼리 더할때의 경우를 말해주는 상태 ex) list 가 -3 5- 형태일때
+  //swh = 4 일때, 앞수가 -이고 연산자가 *일때
+
+  /* 부호에 문제가 생길경우 이 거를 다시봐야됌/
   if ( list -> swh == 2){
     stack_1-> swh = 2;
     stack_2 -> swh = 2;
     list -> swh = 0;
-  }
+  } // 처음입력받을때 맨앞수에 -가있는 상태  ex) -3+5
   if ( list -> swh == 1){
     //printf("\nplay3\n");
     stack_1-> swh = 1;
     stack_2 -> swh = 1;
     list -> swh = 0;
-  }
-  if ( list -> swh == 3){
+  } // zero함수에서 stack_1 과 stack_2 가 스왑되었다는 상태, stack_2의 값이 더크기때문
+  if ( list -> swh == 3){// - - 끼리 더할때의 경우를 말해주는 상태 ex) list 가 -3 5- 형태일때
     stack_1-> swh = 3;
     stack_2 -> swh = 3;
     list -> swh = 0;
-  }
+  } // - - 끼리 더할때의 경우를 말해주는 상태 ex) list 가 -3 5- 형태일때
   if ( list -> swh == 4){ // 앞수가 -이고 연산자가 *일때
     stack_1-> swh = 4;
     stack_2 -> swh = 4;
     list -> swh = 0;
   }
+  */
    while(1){ // +나 - 만날때 까지 노드움직임
     if (curr ->val == '+' || curr->val =='-' || curr->val == '*'){
       break;
@@ -565,9 +579,9 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법을 바뀐식 stack_
          break;
         }
       } // while문
-      int d = stack_1 ->size_1;
+      int d = stack_1 ->size_1; // 소수점 자릿수를 저장
 
-      if ( d > 0) insertAt(stack_3,d,newnode('.'));
+      if ( d > 0) insertAt(stack_3,d,newnode('.')); // 소수점 자릿수가 0보다 큰경우, . 을 삽입
       if ( stack_1 -> swh == 1 ) stack_3 -> swh = stack_1 -> swh;
       if ( stack_1 -> swh == 3) append(stack_3,newnode('-'));// -3 5 - 인경우
       stack_1 ->swh = 0;
@@ -646,8 +660,9 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법을 바뀐식 stack_
     Node *curr_1 = stack_1 -> head;
     Node *curr_2 = stack_2 -> head;
 
-    if(stack_1->size_1 > 0)
-    {  int a = 0; // 소수점의 인덱스 파악후 삭제
+    if(stack_1->size_1 > 0)// 소수점의 인덱스 파악후 삭제
+    {
+      int a = 0;
       while(1)
       {
         if(curr_1->val =='.')
@@ -661,8 +676,8 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법을 바뀐식 stack_
       }
     }
     DLL *stack_4 = newDLL(); //값을 임시 저장해둘 DLL
-    DLL *stack_5 = newDLL(); // reverse를 해줄식을 넣어줄 DLL
-    if( stack_3 -> head == NULL ) append(stack_3,newnode('0')); // 답을 저장할 stack_3
+    DLL *stack_5 = newDLL(); //+계산을 후위표기법으로 하기위해 만든 DLL
+    if( stack_3 -> head == NULL ) append(stack_3,newnode('0')); // 답을 저장할 stack_3,처음일경우 NULL이기 때문에 0 을 넣어줌
     int count = 0 ; // 앞수 자릿수
     int count_1 = 0 ; // 뒷수 자릿수
     int count_2 = 0 ; // 곱하기 올림을 위해서
@@ -684,11 +699,9 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법을 바뀐식 stack_
         Node *curr_3 = stack_3 -> head;
         int a = curr_1 ->val - 48;
         int b = curr_2 ->val - 48;
-        //printf("\n a: %d b: %d\n",a,b);
         int c = a*b;
-        c = c + count_2 ;
-        //printf("\n c: %d\n",c);
-        count_2 = 0;
+        c = c + count_2 ; // 그전에 계산한값에서 올려주는 수가 있을떼
+        count_2 = 0; //올려줬으므로 초기화
         while(1) // 곱한값이 10의 자리를 넘어가는 경우
         {
             if ( c < 10) break;
@@ -699,24 +712,20 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법을 바뀐식 stack_
             }
         }
         c = c + 48 ;
-        //printf("\nc : %c\n",c);
-        //printf("\ncount_1 : %d\n",count_1);
         append(stack_4,newnode(c));
-        //printf("\ncount : %d\n",count);
         for (int i = 0 ; i < count ; i++)
         {
           insertAt(stack_4,0,newnode('0'));
         }
-      ///////////////////////
+      /////////////////////// 기존 cal +계산하는것을 다시 재활용하기위해 다시 후위표기법을 만들어서 +계산을 해줌.
       //printf("\nstack_4\n");
       //print(stack_4); // 거꾸로 한자리 계산한값이 들어가 있는 stack_4
       reverse(stack_4,stack_5); //reverse한 값을 stack_5에 넣어줌
-
       delete_all(stack_4);
       append(stack_5,newnode(' '));  // 45 띄어쓰기 숫자
       //printf("\nstack_3\n");
       //print(stack_3);
-      ////////////////////// 이부분을 고쳐야할듯 stack_3에 후위표기법을 만들어야할듯 3*15은됌.
+      //////////////////////
       while(1) // stack_3의 값을 stack_5에 저장, stack_3은 답을 저장하는 DLL
       {
         //printf("\nval : %c\n",curr_3 ->val);
@@ -737,29 +746,28 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법을 바뀐식 stack_
       cal(stack_5,stack_3); // 후위표기법으로 바뀐 stack_4을 전환한 식을 계산해주고 stack_3에 저장
       delete_all(stack_5); //stack_5은 끝났으므로 비워줌
       reverse(stack_3,stack_4); // stack_3 reverse를 해주기 위한 stack_4
-      delete_all(stack_3);
+      delete_all(stack_3); //stack_3에 계산된 값을 넣어주기위해서 비워줌
       copy_1(stack_3,stack_4); // reverse한 값을 다시 stack_3에 넣어줌
       //printf("\nstack_3\n");
       //print(stack_3);
       delete_all(stack_4);
-
       ///////////////////////////////
       int swh_1 = 0 ;
       if( curr_1 ->prev == NULL)
       {
         count_1 ++; // 뒷수가 옮겨졌으니 0의 자릿수가 하나더 들어남
         count = count_1;
-        if(curr_2 -> prev == NULL) break; // 최종적으로 while을 나가는 식
+        if(curr_2 -> prev == NULL) break; // 최종적으로 while을 나가는 식,즉 * 연산이 끝남
         curr_2 = curr_2 -> prev; // 일의자리 다음에 십의자리를 더함
         while(1) //curr_1을 맨뒤로 초기화시켜줌
         {
-          swh_1 = 1;
+          swh_1 = 1; // curr_1을 맨뒤로 초기화 시켜주었다는 스위치
           if(curr_1 -> next == NULL) break;;
           curr_1 = curr_1 -> next;
           if( c > 0 ) count_2 = count_2 * 10; // 56*67예제처리,넘어가는수가 있을때 뒷수의 연산이 끝났을떄
         }
       }
-      if ( swh_1 != 1)
+      if ( swh_1 != 1) // curr_1을 맨뒤로 초기화시켜주었기 때문에 할필요가없을때 를 위함.
       {
         curr_1 = curr_1 ->prev;
         count++;
@@ -791,15 +799,19 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법을 바뀐식 stack_
         curr_3 = curr_3 ->next;
         count++;
       }
-      a = a*2;
+      a = a*2; //소수점이 있을경우 , stack_1과 stack_2가 무조건 자릿수가 맞춰지기 때문에 *2를 해준거임.
       insertAt(stack_3,count-a,newnode('.'));
     }
-    if( stack_1 ->swh == 4) insertAt(stack_3,0,newnode('-'));
+    if( stack_1 ->swh == 4) insertAt(stack_3,0,newnode('-')); //앞수가 -얐을경우
     //printf("\nanswer\n");
     //print(stack_3);
-    if(stack_3 -> head -> val == '0')
+    while(1) // 필요없는 0의 자릿수를 지워주기위함.
     {
-      deleteAt(stack_3,0);
+      if(stack_3 -> head -> val != '0') break;
+      if(stack_3 -> head -> val == '0' && stack_3 -> head -> next -> val != '.')
+      {
+        deleteAt(stack_3,0);
+      }
     }
     reverse(stack_3,stack_4);
     delete_all(stack_3);
@@ -807,7 +819,6 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법을 바뀐식 stack_
     delete_all(stack_4);
   }
 }
-
 void getnumber(DLL *list){
   int count = 0 ; //몇번 돌았나, -3+5 예제 처리를 위함.
   char temp;
@@ -1167,24 +1178,6 @@ int deleteAt(DLL *list, int index){
   list->head->next = NULL;
   list->head = NULL;
   }
-}
-void delete_par(DLL *list_1){
-  Node *curr = list_1 -> head;
-  if(curr -> val == ' ') deleteAt(list_1,0);
-  while(1){
-    if(curr -> next == NULL) {
-      if(curr->val == '(' ||curr->val ==')' ) {
-        curr->prev->next = NULL;
-      }
-      break;
-    }
-    if(curr->val == '(' ||curr->val ==')' ) {
-      curr-> prev ->next = curr->next;
-      curr-> next ->prev = curr->prev;
-    }
-    curr = curr->next;
-  }
-
 }
 void plus_zero(DLL *list_3 ){ //.앞에 0이없을경우 붙여줌
   Node *curr = list_3 ->head;
