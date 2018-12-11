@@ -50,14 +50,13 @@ void PushOrPop(DLL *stack, char input_opr, DLL *list_1);
 void insert(DLL *list_1,DLL *list_3); // 계산한값과 기존에 있던 식을 합쳐주는 함수
 void zero(DLL *stack_1, DLL *stack_2 ); // 소수점의 자릿수를 맞춰주는 함수
 int insertAt(DLL *stack_3, int index, Node *newnode); // 특정 index에 노드를 삽입하는 함수
-int insertAt_int(DLL *stack_3, int index, Node *newnode); // 자연수 부분에 0을 삽입하기 위한 함수
 void copy_1(DLL *list_1 , DLL *list_3); //list_1에 list_3의 노드를 복사해주는 함수
 int deleteAt(DLL *list, int index);
 void delete_all(DLL *list1);// 노드를 전체 비워주는 함수
-void plus_change(DLL *list_1);// -3 5+ 인경우를 처리해주는 함수 -> 3 5 - 로 바꿔줌, 그리고 list_1->swh 의 값을 바꿔줌
 void size_check(DLL *list_1); // 총 길이를 재주는 함수
 void plus_zero(DLL *list_3 ); // .1 -.1 인경우 .앞에 0을 추가해주는 함수
 void write(DLL* list, FILE *ofp);
+void free_1(DLL* stack);
 
 int main(){
   DLL *list = newDLL(); // 입력을 받을 list
@@ -65,29 +64,31 @@ int main(){
   DLL *list_3 = newDLL();
   DLL *list_4 = newDLL();
   getnumber(list); // 입력을 받아오는 함수
-  int a = list->i ;
+
   DLL *list_1 = newDLL(); //후위표기법으로 바뀐값을 넣어줄 list_1
   postfix(list,list_1);  // 후위표기법으로 바뀐 list_1
-  if(list-> swh == 2){ // -3+5 예제처리를 위해
+  int a = list_1->i ;
+
+  if(list-> swh == 2){ // -3+5 예제처리를 위해,맨앞에 -나온경우 나중에 -를 붙여줌.
     list-> swh = 0;
     insertAt(list_1,0,newnode('-'));
-    //printf("\nplay1\n");
-    plus_change(list_1);
   }
-  //printf("\nlist_1\n");
-  //print(list_1);
   cal(list_1,list_2);  // 계산된 list_2
-  //printf("\nlist_3\n");
   reverse(list_2,list_3);
+  //printf("\nlist_3\n");
   //print(list_3);
-  /*
-  printf("\ninsert before list_1\n");
-  print(list_1);
-  insert(list_1,list_3); // 이게문제
-  printf("\ninsert list_1\n");
-  print(list_1);
-  plus_zero(list_1);
-  */
+  //insert(list_1,list_3);
+  //printf("\ninsert list_1\n");
+  //print(list_1);
+  //print(list_3);
+
+  //printf("\ninsert before list_1\n");
+  //print(list_1);
+  //insert(list_1,list_3); // 이게문제
+  //printf("\ninsert list_1\n");
+  //print(list_1);
+  //plus_zero(list_1);
+
   //printf("\nlist_3\n");
   //print(list_3);
   ///////
@@ -98,10 +99,12 @@ int main(){
     list_2 -> swh = 0;
     list_3 -> swh = 0;
     insert(list_1,list_3); //list_1에 모든걸 저장
+    //printf("\n");
+    //print(list_1);
     size_check(list_1);
     size_check(list_3);
     delete_all(list_3);
-    plus_change(list_1);
+    //plus_change(list_1);
     size_check(list_2);
     delete_all(list_2);
     cal(list_1,list_2);
@@ -113,6 +116,20 @@ int main(){
 
  }
 
+/*
+void free_1(DLL* stack) //free해주는 함수.
+{
+  Node *curr = stack->head;
+  Node *temp ;
+  while(1)
+  {
+    if(curr -> next == NULL) break;
+    temp = curr ->next;
+    free(curr);
+  }
+
+}
+*/
 void size_check(DLL *list_1){ // 사이즈를 체크해주는 함수
   Node *curr = list_1-> head;
   list_1 -> size = 0 ;
@@ -124,35 +141,6 @@ void size_check(DLL *list_1){ // 사이즈를 체크해주는 함수
     else {
       list_1 -> size = list_1 -> size + 1 ;
       curr = curr->next;
-    }
-  }
-}
-void plus_change(DLL *list_1){ // 앞의수가 -일경우 뒤에있는 +를 -로 바꿔주기 위한 함수
-  Node *curr = list_1 -> head;
-  if( curr->val == '-'){
-    while(1){
-      if (curr -> next == NULL) break;
-        curr = curr->next;
-      if (curr -> val == '+'){ // -3+5인 경우
-        //printf("\nplay2\n");
-        curr -> val = '-';
-        list_1 -> swh = 2;
-        deleteAt(list_1,0);
-        break;
-      }
-      else if(curr -> val == '-'){
-          //printf("\nplus_chage\n");
-          curr -> val = '+';
-          //printf("\ncurr -> val : %c\n",curr->val);
-          deleteAt(list_1,0);
-          list_1 -> swh = 3;
-          break;
-      }
-      else if(curr -> val == '*'){
-        deleteAt(list_1,0);
-        list_1 -> swh = 4; //*하기용 -붙여주기
-        break;
-      }
     }
   }
 }
@@ -182,8 +170,16 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
   int b = 0 ; // 소수점 자릿수 저장
   int c = 0 ; // 자연수 자릿수 저장
   int d = 0 ; // 자연수 자릿수 저장
-  while(1){
+  int swh_1 = 0 ; //앞수에 마이너스가 들어왔을 경우 -3 5 +
+  int swh_2 = 0 ; //뒷수에 마이너스가 들어왔을 경우 3 -5 +
+  while(1){ //자연수자릿수 체크
     if(curr -> val == '.') break;
+    else if (curr->val =='-')
+    {
+      swh_1 = 1;
+      deleteAt(stack_1,0); //일단 삭제하고 나중에 붙여줌
+      curr = curr->next;
+    }
     else if ( curr -> next == NULL) {
       c++;
       break;
@@ -193,15 +189,21 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
       curr = curr -> next;
     }
   }
-  while(1){
+  while(1){ //소수점자릿수 체크
     if (curr->next == NULL) break;
     else {
       a++;
       curr = curr -> next ;
     }
   }
-  while(1){
+  while(1){ //자연수자릿수 체크
     if(curr_1 -> val == '.') break;
+    else if (curr_1->val =='-')
+    {
+      swh_2 = 1;
+      deleteAt(stack_2,0); //일단삭제 하고 나중에 붙여줌
+      curr_1 = curr_1->next;
+    }
     else if (curr_1 ->next ==NULL){
       d++;
       break;
@@ -211,7 +213,7 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
       curr_1 = curr_1 -> next;
     }
   }
-  while(1){
+  while(1){ //소수점 자릿수 체크
     if (curr_1->next == NULL) break;
     else {
       b++; //소수점 자릿수
@@ -232,13 +234,13 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
     int f = c-d ; //0을 몇개를 넣을 것인가?
     //printf("\nf : %d\n",f);
     for (int i = 0 ; i < f ; i++){
-      insertAt_int(stack_2,0,newnode('0'));
+      insertAt(stack_2,0,newnode('0'));
     }
   }
   else if ( d > c ) { //뒷수의 자연수 자리가 더 큰 경우
     int f = d - c;
     for (int i = 0 ; i < f ; i++ ){
-      insertAt_int(stack_1,0,newnode('0'));
+      insertAt(stack_1,0,newnode('0'));
     }
   }
   else{
@@ -264,14 +266,18 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
     stack_1 -> size_1 = b;
   }
    if ( c < d){ // 뒷수가 더 큰수 일때
+    int temp = 0 ; // -부호 붙여줄지 안붙여줄지 판단해주는 swh교체
+    temp = swh_1 ;
+    swh_1 = swh_2;
+    swh_2 = swh_1;
     copy_1(stack_3,stack_1);
     delete_all(stack_1);
     copy_1(stack_1,stack_2);
     delete_all(stack_2);
     copy_1(stack_2,stack_3);
     delete_all(stack_3);
-    stack_1 -> swh = 1;
-    stack_2 -> swh = 1;
+    //stack_1 -> swh = 1;
+    //stack_2 -> swh = 1;
   }
   else if ( c == d){
     Node *curr_2 = stack_1 -> head;
@@ -284,20 +290,34 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
       int m = curr_2 -> val -48;
       int n = curr_3 -> val -48;
       if( n > m ){
+        int temp = 0 ; // -부호 붙여줄지 안붙여줄지 판단해주는 swh교체
+        temp = swh_1 ;
+        swh_1 = swh_2;
+        swh_2 = swh_1;
         copy_1(stack_3,stack_1);
         delete_all(stack_1);
         copy_1(stack_1,stack_2);
         delete_all(stack_2);
         copy_1(stack_2,stack_3);
         delete_all(stack_3);
-        stack_1 -> swh = 1;
-        stack_2 -> swh = 1;
+        //stack_1 -> swh = 1;
+        //stack_2 -> swh = 1;
         break;
       }
       if ( curr_2 -> next == NULL && curr_3 -> next ==NULL) break;
       curr_2 = curr_2 ->next;
       curr_3 = curr_3 ->next;
     }
+  }
+  if(swh_1 == 1)
+  {
+    insertAt(stack_1,0,newnode('-'));
+    swh_1 = 0;
+  }
+  if(swh_2 == 1)
+  {
+    insertAt(stack_2,0,newnode('-'));
+    swh_2= 0;
   }
 }
 void insert(DLL *list_1,DLL *list_3){ // 계산된 값을  원래 있던 후위표기법 식이랑 합침
@@ -306,11 +326,23 @@ void insert(DLL *list_1,DLL *list_3){ // 계산된 값을  원래 있던 후위�
   int count = 0 ; // list_1의 총길이
   int count_1 = 0; //
   int count_2 = 0 ; // 처음지울 인뎃스번호
+  int swh = 0; // -가 연산자가 아니고 부호표시를 해주는 것일때
    while(1)
    { //지울 연산자의 다음 포인터
-    if ( curr -> val == '+' || curr ->val == '-' || curr->val == '*') //포인터가 연산자에 있음.
+    if ( curr -> val == '+' || curr->val == '*') //포인터가 연산자에 있음.
     {
       break;
+    }
+    else if( curr->val == '-' ){ // 연산자의 -인지,부호표시를 위한 -인지 확인 ex -3 5 - ,3 5 -
+      if(curr->next == NULL || curr->next->val == ' ')
+      {
+        break;
+      }
+      else
+      {
+        curr = curr->next;
+        swh = 1;
+      }
     }
     else
     {
@@ -350,6 +382,8 @@ void insert(DLL *list_1,DLL *list_3){ // 계산된 값을  원래 있던 후위�
     count_1++;
   }
   count_2 = count - count_1 ; //처음에 지울 인덱스
+  if (swh == 1) count_2 ++;  // -가 연산자가 아니고 부호표시를 해주는 것일때
+  //printf("\ncount_2 : %d\n",count_2);
   count = count + 2;
   while(1) // curr의 헤드를 다시맨앞으로 보냄 1 3 3 * + 을 위해서 list_1->head -> val 로만 판단을해서
   {
@@ -406,19 +440,40 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
   DLL *stack_1 = newDLL(); // 숫자1
   DLL *stack_2 = newDLL(); // 숫자2
   Node *curr = list -> head ;
+  int operator = 0 ; // 어떤 연산자인지 확인 + : 1, - : 2, * : 3
   while(1){ // + - 만날때 까지 노드움직임
-    if( curr->val == '+' || curr->val == '-' || curr->val == '*'){
+    if( curr->val == '+' ){
       curr = curr->prev;
       curr = curr->prev;
+      operator = 1;
       break;
+    }
+    else if(curr->val == '*')
+    {
+      curr = curr->prev;
+      curr = curr->prev;
+      operator = 3;
+      break;
+    }
+    else if( curr->val == '-' ){ // 연산자의 -인지,부호표시를 위한 -인지 확인 ex -3 5 - ,3 5 -
+      if(curr->next == NULL || curr->next->val == ' ')
+      {
+        curr = curr->prev;
+        curr = curr->prev;
+        operator = 2;
+        break;
+      }
+      curr = curr->next;
     }
     else{
       curr = curr->next;
     }
   }
+  //printf("\noperator : %d\n",operator);
   while(1){ //첫번째 인자수 맨앞 빈칸
     if( curr->prev == NULL)
     {
+
       break;
     }
     else if(curr->val == ' ')
@@ -474,15 +529,92 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
     }
   }
 
-  zero(stack_1,stack_2);
+  zero(stack_1,stack_2); //stack_1 이 더 큰값임.
+  if(stack_1->head->val == '-' && stack_2->head->val == '-' && operator == 1) //  -5 -3 + 인경우
+  {
+    deleteAt(stack_1,0);
+    deleteAt(stack_2,0);
+    stack_1 -> swh = 1; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
+    stack_2 -> swh = 1;
+  }
+  else if(stack_1 -> head -> val =='-' && stack_2-> head -> val != '-' && operator == 1 ) // -5 3 + 인경우
+  {
+    deleteAt(stack_1,0);
+    //insertAt(stack_1,0,newnode('0')); // -대신 0을 넣어줌
+    stack_1 -> swh = 1; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
+    stack_2 -> swh = 1;
+    operator = 2;
+  }
+  else if(stack_1 -> head -> val != '-' && stack_2-> head -> val == '-' && operator == 1 ) // 5 -3 + 인경우
+  {
+    deleteAt(stack_2,0);
+    //insertAt(stack_2,0,newnode('0')); // -대신 0을 넣어줌
+    stack_1 -> swh = 0; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
+    stack_2 -> swh = 0;
+    operator = 2;
+  }
+  else if(stack_1 -> head -> val == '-' && stack_2-> head -> val == '-' && operator == 2 ) // -5 -3 - 인경우
+  {
+    deleteAt(stack_1,0);
+    deleteAt(stack_2,0);
+    stack_1 -> swh = 1; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
+    stack_2 -> swh = 1;
+  }
+  else if(stack_1 -> head -> val == '-' && stack_2-> head -> val != '-' && operator == 2 ) // -5 3 - 인경우
+  {
+    deleteAt(stack_1,0);
+    //insertAt(stack_1,0,newnode('0'));
+    stack_1 -> swh = 1; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
+    stack_2 -> swh = 1;
+    operator = 1 ; // 연산자를 더하기로 바꿔줌
+  }
+  else if(stack_1 -> head -> val != '-' && stack_2-> head -> val == '-' && operator == 2 ) // 5 -3 - 인경우
+  {
+    deleteAt(stack_2,0);
+    //insertAt(stack_2,0,newnode('0'));
+    stack_1 -> swh = 0; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
+    stack_2 -> swh = 0;
+    operator = 1 ; // 연산자를 더하기로 바꿔줌
+  }
+  else if(stack_1 -> head -> val == '-' && stack_2-> head -> val == '-' && operator == 3 ) // -5 -3 * 인경우
+  {
+    deleteAt(stack_1,0);
+    deleteAt(stack_2,0);
+    stack_1 -> swh = 0; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
+    stack_2 -> swh = 0;
+  }
+  else if(stack_1 -> head -> val == '-' && stack_2-> head -> val != '-' && operator == 3 ) // -5 3 * 인경우
+  {
+    deleteAt(stack_1,0);
+    //insertAt(stack_1,0,newnode('0'));
+    stack_1 -> swh = 1; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
+    stack_2 -> swh = 1;
+  }
+  else if(stack_1 -> head -> val != '-' && stack_2-> head -> val == '-' && operator == 3 ) // 5 -3 * 인경우
+  {
+    deleteAt(stack_2,0);
+    //insertAt(stack_2,0,newnode('0'));
+    stack_1 -> swh = 1; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
+    stack_2 -> swh = 1;
+  }
+  /*
+  if (stack_1->head -> val == '0' && stack_2 -> head -> val == '0')
+  {
+    deleteAt(stack_1,0);
+    printf("stack_2->head->val : %c",stack_2->head->val);
+    deleteAt(stack_2,0);
+  }
+  */
+
   /*
   printf("\nstack_1,stack_2 \n");
   print(stack_1);
   printf("\n");
   print(stack_2);
   */
-  //printf("\n size_1 : %d , size_1 : %d", stack_1->size_1,stack_2->size_1);
 
+  //printf("\n size_1 : %d , size_1 : %d", stack_1->size_1,stack_2->size_1);
+  /*
   if(list->swh != 0 )
   {
     int temp = list->swh;
@@ -490,43 +622,15 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
     stack_2 -> swh = temp ;
     list->swh = 0;
   }
+  */
   //swh = 1 일떄, zero함수에서 stack_1 과 stack_2 가 스왑되었다는 상태, stack_2의 값이 더크기때문
   //swh = 2 일때, 처음입력받을때 맨앞수에 -가있는 상태  ex) -3+5
   //swh = 3 일떄, - - 끼리 더할때의 경우를 말해주는 상태 ex) list 가 -3 5- 형태일때
   //swh = 4 일때, 앞수가 -이고 연산자가 *일때
 
-  /* 부호에 문제가 생길경우 이 거를 다시봐야됌/
-  if ( list -> swh == 2){
-    stack_1-> swh = 2;
-    stack_2 -> swh = 2;
-    list -> swh = 0;
-  } // 처음입력받을때 맨앞수에 -가있는 상태  ex) -3+5
-  if ( list -> swh == 1){
-    //printf("\nplay3\n");
-    stack_1-> swh = 1;
-    stack_2 -> swh = 1;
-    list -> swh = 0;
-  } // zero함수에서 stack_1 과 stack_2 가 스왑되었다는 상태, stack_2의 값이 더크기때문
-  if ( list -> swh == 3){// - - 끼리 더할때의 경우를 말해주는 상태 ex) list 가 -3 5- 형태일때
-    stack_1-> swh = 3;
-    stack_2 -> swh = 3;
-    list -> swh = 0;
-  } // - - 끼리 더할때의 경우를 말해주는 상태 ex) list 가 -3 5- 형태일때
-  if ( list -> swh == 4){ // 앞수가 -이고 연산자가 *일때
-    stack_1-> swh = 4;
-    stack_2 -> swh = 4;
-    list -> swh = 0;
-  }
-  */
-   while(1){ // +나 - 만날때 까지 노드움직임
-    if (curr ->val == '+' || curr->val =='-' || curr->val == '*'){
-      break;
-    }
-    else{
-      curr = curr->next;
-    }
-  }
-   if( curr ->val == '+' ){
+  /////////////////////
+  ///     +계산
+   if( operator == 1 ){
     Node *curr_1 = stack_1 ->head;
     Node *curr_2 = stack_2 ->head;
      while(1){ // 노드 끝까지 보냄
@@ -582,15 +686,16 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
       int d = stack_1 ->size_1; // 소수점 자릿수를 저장
 
       if ( d > 0) insertAt(stack_3,d,newnode('.')); // 소수점 자릿수가 0보다 큰경우, . 을 삽입
-      if ( stack_1 -> swh == 1 ) stack_3 -> swh = stack_1 -> swh;
-      if ( stack_1 -> swh == 3) append(stack_3,newnode('-'));// -3 5 - 인경우
+      //if ( stack_1 -> swh == 1 ) stack_3 -> swh = stack_1 -> swh;
+      if ( stack_1 -> swh == 1) append(stack_3,newnode('-'));// -3 5 - 인경우
       stack_1 ->swh = 0;
       stack_2 ->swh = 0;
       stack_3 ->swh = 0;
     } // if +문에 걸림
 
-  //// -계산
-  else if( curr -> val == '-' ){
+  ////    -계산
+  else if( operator == 2 ){
+
      Node *curr_1 = stack_1 ->head;
      Node *curr_2 = stack_2 ->head;
    while(1){ // 노드 끝까지 보냄
@@ -631,8 +736,8 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
          break;
         }
      }
+
      int d = stack_1 ->size_1;
-     stack_3 -> swh = stack_1 -> swh;
      //printf("\n stack_3 -> swh : %d\n",stack_3 -> swh);
      //printf("\nd : %d\n",d);
      if ( d > 0) insertAt(stack_3,d,newnode('.'));
@@ -649,14 +754,18 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
          curr_3 ->next = NULL;
        }
      }
+     //printf("\nstack_3\n");
+     //print(stack_3);
      ////// stack_3의 값이 -일경우
-     if ( stack_3 -> swh == 1) append(stack_3,newnode('-'));
+     if ( stack_1 -> swh == 1) append(stack_3,newnode('-'));
      stack_1 ->swh = 0;
      stack_2 ->swh = 0;
      stack_3 ->swh = 0;
+
    }
+
   /////// *계산
-  else if (curr -> val == '*'){
+  else if(operator == 3){
     Node *curr_1 = stack_1 -> head;
     Node *curr_2 = stack_2 -> head;
 
@@ -744,6 +853,7 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
       //print(stack_5);
       delete_all(stack_3); // stack_3의 값을 stack_5에 넣어주었으므로 비워줌
       cal(stack_5,stack_3); // 후위표기법으로 바뀐 stack_4을 전환한 식을 계산해주고 stack_3에 저장
+      //free_1(stack_5);
       delete_all(stack_5); //stack_5은 끝났으므로 비워줌
       reverse(stack_3,stack_4); // stack_3 reverse를 해주기 위한 stack_4
       delete_all(stack_3); //stack_3에 계산된 값을 넣어주기위해서 비워줌
@@ -802,7 +912,7 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
       a = a*2; //소수점이 있을경우 , stack_1과 stack_2가 무조건 자릿수가 맞춰지기 때문에 *2를 해준거임.
       insertAt(stack_3,count-a,newnode('.'));
     }
-    if( stack_1 ->swh == 4) insertAt(stack_3,0,newnode('-')); //앞수가 -얐을경우
+    if( stack_1 ->swh == 1) insertAt(stack_3,0,newnode('-')); //앞수가 -얐을경우
     //printf("\nanswer\n");
     //print(stack_3);
     while(1) // 필요없는 0의 자릿수를 지워주기위함.
@@ -816,8 +926,10 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
     reverse(stack_3,stack_4);
     delete_all(stack_3);
     copy_1(stack_3,stack_4);
+    //free_1(stack_4);
     delete_all(stack_4);
   }
+
 }
 void getnumber(DLL *list){
   int count = 0 ; //몇번 돌았나, -3+5 예제 처리를 위함.
@@ -906,26 +1018,28 @@ void getnumber(DLL *list){
 		return FALSE;
 	}
 }
- void POP_all(DLL *stack,DLL *list_1)
+void POP_all(DLL *stack,DLL *list_1)
 {
-  Node *cur = stack->head;
-  while(cur->next != NULL){
-		cur = cur->next;
-	}
-  while(1){
-    if( cur -> prev == NULL){
-      append(list_1, newnode(cur->val));
-	  append(list_1,newnode(' '));
-	  break;
-    }
-    else{
-      append(list_1, newnode(cur->val));
-	  append(list_1,newnode(' '));
-      cur = cur->prev;
-    }
-  }
-  free(stack);
-  stack = newDLL();
+ Node *cur = stack->head;
+ while(cur->next != NULL){
+   cur = cur->next;
+ }
+ while(1){
+   if( cur -> prev == NULL){
+     append(list_1, newnode(cur->val));
+   list_1->i+=1;
+   append(list_1,newnode(' '));
+   break;
+   }
+   else{
+     append(list_1, newnode(cur->val));
+   list_1->i+=1;
+   append(list_1,newnode(' '));
+     cur = cur->prev;
+   }
+ }
+ free(stack);
+ stack = newDLL();
 }
 void G_POP(DLL *stack, DLL*list_1)
 {
@@ -934,6 +1048,7 @@ void G_POP(DLL *stack, DLL*list_1)
 		end = end -> next;
 	while (end -> val != '(') {
 		append(list_1,newnode(end->val));
+		list_1->i+=1;
 		if (end->prev->val != '(')
 			append(list_1,newnode(' '));
 		end = end -> prev;
@@ -950,43 +1065,45 @@ void G_POP(DLL *stack, DLL*list_1)
 		stack -> ssize -= 1;
 	}
 }
- void PushOrPop(DLL *stack, char input_opr, DLL *list_1)
+void PushOrPop(DLL *stack, char input_opr, DLL *list_1)
 {
-	while (1) {
-		int ssize = stack->ssize;
-		if (ssize == 0) {
-			stack_append(stack,newnode(input_opr));
-			break;
-		}
-		else {
-			Node *bigyo = stack->head;
-			while (bigyo->next != NULL)
-				bigyo = bigyo -> next;
-			if (GreaterOpr(bigyo->val,input_opr) == FALSE){
-				stack_append(stack,newnode(input_opr));
-				break;
-			}
-			else {
-				if (ssize == 1) {
-					POP_all(stack,list_1);
-					stack_append(stack,newnode(input_opr));
-					break;
-				}
-				else if (ssize >= 2) {
-					append(list_1,newnode(bigyo->val));
-					append(list_1,newnode(' '));
-					bigyo=bigyo->prev;
-					bigyo->next = NULL;
-					stack ->ssize -= 1;
-				}
-			}
-		}
-	}
+ while (1) {
+   int ssize = stack->ssize;
+   if (ssize == 0) {
+     stack_append(stack,newnode(input_opr));
+     break;
+   }
+   else {
+     Node *bigyo = stack->head;
+     while (bigyo->next != NULL)
+       bigyo = bigyo -> next;
+     if (GreaterOpr(bigyo->val,input_opr) == FALSE){
+       stack_append(stack,newnode(input_opr));
+       break;
+     }
+     else {
+       if (ssize == 1) {
+         POP_all(stack,list_1);
+         stack_append(stack,newnode(input_opr));
+         break;
+       }
+       else if (ssize >= 2) {
+         append(list_1,newnode(bigyo->val));
+         list_1->i+=1;
+         append(list_1,newnode(' '));
+         bigyo=bigyo->prev;
+         bigyo->next = NULL;
+         stack ->ssize -= 1;
+       }
+     }
+   }
+ }
 }
 void postfix(DLL *list,DLL *list_1){
   DLL *stack = newDLL(); // 연산자 담아둘 스택
   Node *curr = list -> head ;
   while(1){
+
     if( curr -> next == NULL){
 	  if (isdigit(curr->val)) {//마지막숫자 일 경우
     	  append(list_1,newnode(curr->val));
@@ -994,9 +1111,17 @@ void postfix(DLL *list,DLL *list_1){
      	  break;
 	  }
 	  else if (curr->val == ')') {
-		  append(list_1, newnode(' '));
+		  Node *tail1 = list_1->head;
+		  while (tail1->next != NULL)
+			  tail1 = tail1 -> next;
+		  if (tail1 -> val != ' ')
+		  	append(list_1, newnode(' '));
 		  G_POP(stack,list_1);
-		  append(list_1,newnode(' '));
+		  Node *tail2 = list_1->head;
+		  while (tail2 -> next != NULL)
+			  tail2 = tail2 -> next;
+		  if (tail2 -> val != ' ')
+		  	append(list_1,newnode(' '));
 		  break;
 	  }
     }
@@ -1006,7 +1131,11 @@ void postfix(DLL *list,DLL *list_1){
       curr = curr -> next;
     }
 	else if (curr -> val == ')') {
-		append(list_1, newnode(' '));
+		Node *tail1 = list_1->head;
+		while (tail1 -> next != NULL)
+			tail1 = tail1 -> next;
+		if (tail1 -> val != ' ')
+			append(list_1, newnode(' '));
 		G_POP(stack,list_1);
 		curr = curr -> next;
 	}
@@ -1014,9 +1143,17 @@ void postfix(DLL *list,DLL *list_1){
 	  if (curr->val == '(') {
 		  PushOrPop(stack, curr->val, list_1);
 		  curr = curr -> next;
+		  if (curr -> val == '-') {
+			  append(list_1,newnode('-'));
+			  curr = curr -> next;
+		  }
 	  }
 	  else {
-		  append(list_1,newnode(' '));
+		  Node *tail = list_1->head;
+		  while (tail -> next != NULL)
+			  tail = tail -> next;
+		  if (tail -> val != ' ')
+		  	append(list_1,newnode(' '));
     	  PushOrPop(stack, curr->val, list_1);
 		  curr = curr -> next;
 	  }
@@ -1087,6 +1224,7 @@ void write(DLL *list,FILE *ofp){
     curr = curr->next;
   }
 }
+
 int insertAt_int(DLL *list, int index, Node *newnode){
 	int count = 0;
 	Node *curr = list->head;
@@ -1111,6 +1249,7 @@ int insertAt_int(DLL *list, int index, Node *newnode){
 	curr->prev->next = newnode;
 	curr->prev = newnode;
 }
+
 int insertAt(DLL *stack_3, int index, Node *newnode){ // 소수점 삽입을 위한 함수
 	Node *curr = stack_3->head;
   int count = 0 ;
