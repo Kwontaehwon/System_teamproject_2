@@ -68,13 +68,18 @@ int main(){
   DLL *list_1 = newDLL(); //후위표기법으로 바뀐값을 넣어줄 list_1
   postfix(list,list_1);  // 후위표기법으로 바뀐 list_1
   int a = list_1->i ;
-
   if(list-> swh == 2){ // -3+5 예제처리를 위해,맨앞에 -나온경우 나중에 -를 붙여줌.
     list-> swh = 0;
     insertAt(list_1,0,newnode('-'));
   }
+  //printf("\npostfix\n");
+  //print(list_1);
+  //printf("\n");
   cal(list_1,list_2);  // 계산된 list_2
+  //printf("\nlist_2\n");
+  //print(list_2);
   reverse(list_2,list_3);
+
   //printf("\nlist_3\n");
   //print(list_3);
   //insert(list_1,list_3);
@@ -166,6 +171,10 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
   Node *curr = stack_1 ->head;
   Node *curr_1 = stack_2 ->head;
   DLL *stack_3 = newDLL(); // 임시로 값을 저장해둘 DLL ,무조건 stack_1이 큰수 이게
+  //printf("\nstack_1,stack_2 \n");
+  //print(stack_1);
+  //printf("\n");
+  //print(stack_2);
   int a = 0 ; // 소수점 자릿수 저장
   int b = 0 ; // 소수점 자릿수 저장
   int c = 0 ; // 자연수 자릿수 저장
@@ -222,7 +231,7 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
   }
   //////////////////
   //printf("\na : %d b : %d\n",a,b);
-  //printf("\nc : %d d : %d\n",c,d);
+  //printf("\nint c : %d d : %d\n",c,d);
   //////////////////
   stack_1 -> size_2 = c; // 자연수 자릿수 저장
   stack_2 -> size_2 = d;
@@ -266,18 +275,18 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
     stack_1 -> size_1 = b;
   }
    if ( c < d){ // 뒷수가 더 큰수 일때
-    int temp = 0 ; // -부호 붙여줄지 안붙여줄지 판단해주는 swh교체
+    int temp ; // -부호 붙여줄지 안붙여줄지 판단해주는 swh교체
     temp = swh_1 ;
     swh_1 = swh_2;
-    swh_2 = swh_1;
+    swh_2 = temp;
     copy_1(stack_3,stack_1);
     delete_all(stack_1);
     copy_1(stack_1,stack_2);
     delete_all(stack_2);
     copy_1(stack_2,stack_3);
     delete_all(stack_3);
-    //stack_1 -> swh = 1;
-    //stack_2 -> swh = 1;
+    stack_1 -> swh = 2; //스왑되었다는 표시
+    stack_2 -> swh = 2; // 스왑되었다는 표시
   }
   else if ( c == d){
     Node *curr_2 = stack_1 -> head;
@@ -289,19 +298,19 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
       }
       int m = curr_2 -> val -48;
       int n = curr_3 -> val -48;
-      if( n > m ){
-        int temp = 0 ; // -부호 붙여줄지 안붙여줄지 판단해주는 swh교체
+      if( n > m ){ // 뒷수가 더 큰수일때
+        int temp ; // -부호 붙여줄지 안붙여줄지 판단해주는 swh교체
         temp = swh_1 ;
         swh_1 = swh_2;
-        swh_2 = swh_1;
+        swh_2 = temp;
         copy_1(stack_3,stack_1);
         delete_all(stack_1);
         copy_1(stack_1,stack_2);
         delete_all(stack_2);
         copy_1(stack_2,stack_3);
         delete_all(stack_3);
-        //stack_1 -> swh = 1;
-        //stack_2 -> swh = 1;
+        stack_1 -> swh = 2; //스왑되었다는 표시
+        stack_2 -> swh = 2; // 스왑되었다는 표시
         break;
       }
       if ( curr_2 -> next == NULL && curr_3 -> next ==NULL) break;
@@ -530,6 +539,10 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
   }
 
   zero(stack_1,stack_2); //stack_1 이 더 큰값임.
+  size_check(stack_1);
+  size_check(stack_2);
+
+
   if(stack_1->head->val == '-' && stack_2->head->val == '-' && operator == 1) //  -5 -3 + 인경우
   {
     deleteAt(stack_1,0);
@@ -548,22 +561,28 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
   else if(stack_1 -> head -> val != '-' && stack_2-> head -> val == '-' && operator == 1 ) // 5 -3 + 인경우
   {
     deleteAt(stack_2,0);
-    //insertAt(stack_2,0,newnode('0')); // -대신 0을 넣어줌
     stack_1 -> swh = 0; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
     stack_2 -> swh = 0;
     operator = 2;
   }
-  else if(stack_1 -> head -> val == '-' && stack_2-> head -> val == '-' && operator == 2 ) // -5 -3 - 인경우
+  else if(stack_1 -> head -> val == '-' && stack_2-> head -> val == '-' && operator == 2 ) // -5 -3 - 인경우 ,
   {
     deleteAt(stack_1,0);
     deleteAt(stack_2,0);
-    stack_1 -> swh = 1; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
-    stack_2 -> swh = 1;
+    if(stack_1 -> swh == 2 && stack_2 -> swh == 2) // 스왑되었을때, , 처음입력들어오는 값이 -1-(-3)인경우,
+    {
+      stack_1 -> swh = 0;
+      stack_2 -> swh = 0;
+    }
+    else
+    {
+      stack_1 -> swh = 1; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
+      stack_2 -> swh = 1;
+    }
   }
   else if(stack_1 -> head -> val == '-' && stack_2-> head -> val != '-' && operator == 2 ) // -5 3 - 인경우
   {
     deleteAt(stack_1,0);
-    //insertAt(stack_1,0,newnode('0'));
     stack_1 -> swh = 1; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
     stack_2 -> swh = 1;
     operator = 1 ; // 연산자를 더하기로 바꿔줌
@@ -571,10 +590,18 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
   else if(stack_1 -> head -> val != '-' && stack_2-> head -> val == '-' && operator == 2 ) // 5 -3 - 인경우
   {
     deleteAt(stack_2,0);
-    //insertAt(stack_2,0,newnode('0'));
+    if(stack_1 -> swh == 2 && stack_2 -> swh == 2) // 스왑되었을때, , 처음입력들어오는 값이 -3 -5 인경우
+    {
+      stack_1 -> swh = 1;
+      stack_2 -> swh = 1;
+      operator = 1 ; // 연산자를 더하기로 바꿔줌
+    }
+    else
+    {
     stack_1 -> swh = 0; // 무조건 계산끝난뒤에 앞에 -를 붙여주는 swh = 1;
     stack_2 -> swh = 0;
     operator = 1 ; // 연산자를 더하기로 바꿔줌
+    }
   }
   else if(stack_1 -> head -> val == '-' && stack_2-> head -> val == '-' && operator == 3 ) // -5 -3 * 인경우
   {
@@ -612,22 +639,6 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
   printf("\n");
   print(stack_2);
   */
-
-  //printf("\n size_1 : %d , size_1 : %d", stack_1->size_1,stack_2->size_1);
-  /*
-  if(list->swh != 0 )
-  {
-    int temp = list->swh;
-    stack_1 -> swh = temp ;
-    stack_2 -> swh = temp ;
-    list->swh = 0;
-  }
-  */
-  //swh = 1 일떄, zero함수에서 stack_1 과 stack_2 가 스왑되었다는 상태, stack_2의 값이 더크기때문
-  //swh = 2 일때, 처음입력받을때 맨앞수에 -가있는 상태  ex) -3+5
-  //swh = 3 일떄, - - 끼리 더할때의 경우를 말해주는 상태 ex) list 가 -3 5- 형태일때
-  //swh = 4 일때, 앞수가 -이고 연산자가 *일때
-
   /////////////////////
   ///     +계산
    if( operator == 1 ){
@@ -832,6 +843,7 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
       reverse(stack_4,stack_5); //reverse한 값을 stack_5에 넣어줌
       delete_all(stack_4);
       append(stack_5,newnode(' '));  // 45 띄어쓰기 숫자
+
       //printf("\nstack_3\n");
       //print(stack_3);
       //////////////////////
@@ -856,6 +868,7 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
       //free_1(stack_5);
       delete_all(stack_5); //stack_5은 끝났으므로 비워줌
       reverse(stack_3,stack_4); // stack_3 reverse를 해주기 위한 stack_4
+
       delete_all(stack_3); //stack_3에 계산된 값을 넣어주기위해서 비워줌
       copy_1(stack_3,stack_4); // reverse한 값을 다시 stack_3에 넣어줌
       //printf("\nstack_3\n");
@@ -867,7 +880,13 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
       {
         count_1 ++; // 뒷수가 옮겨졌으니 0의 자릿수가 하나더 들어남
         count = count_1;
-        if(curr_2 -> prev == NULL) break; // 최종적으로 while을 나가는 식,즉 * 연산이 끝남
+
+        if(curr_2 -> prev == NULL)
+        {
+
+          break; // 최종적으로 while을 나가는 식,즉 * 연산이 끝남
+        }
+
         curr_2 = curr_2 -> prev; // 일의자리 다음에 십의자리를 더함
         while(1) //curr_1을 맨뒤로 초기화시켜줌
         {
@@ -886,7 +905,6 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
 
 
     }  // 더하기 계산부분 끝남
-
     //printf("\nstack_3\n");
     //print(stack_3);
 
@@ -913,20 +931,26 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
       insertAt(stack_3,count-a,newnode('.'));
     }
     if( stack_1 ->swh == 1) insertAt(stack_3,0,newnode('-')); //앞수가 -얐을경우
-    //printf("\nanswer\n");
+    //printf("\nstack_3\n");
     //print(stack_3);
+
     while(1) // 필요없는 0의 자릿수를 지워주기위함.
     {
+      if(stack_3->head -> val =='0' && stack_3->head->next == NULL) break; // 답인 0 인 경우를 위함
       if(stack_3 -> head -> val != '0') break;
       if(stack_3 -> head -> val == '0' && stack_3 -> head -> next -> val != '.')
       {
         deleteAt(stack_3,0);
       }
     }
+    //printf("\nstack_4\n");
+    //print(stack_4);
+    delete_all(stack_4);
     reverse(stack_3,stack_4);
     delete_all(stack_3);
     copy_1(stack_3,stack_4);
-    //free_1(stack_4);
+    //printf("\nstack_3\n");
+    //print(stack_3);
     delete_all(stack_4);
   }
 
@@ -1287,7 +1311,7 @@ int deleteAt(DLL *list, int index){
    int count = 0;
    if(list->size >1){
    if (index == 0){
-      list->head->next->prev = NULL;
+      list->head->next->prev = list->head->prev;
       list ->head = list->head->next;
       list -> size = list -> size - 1;
       return 0;
