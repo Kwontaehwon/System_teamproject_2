@@ -48,7 +48,7 @@ int GreaterOpr(char opr1, char opr2);
 void POP_all(DLL *stack, DLL *list_1);
 void PushOrPop(DLL *stack, char input_opr, DLL *list_1);
 void insert(DLL *list_1,DLL *list_3); // 계산한값과 기존에 있던 식을 합쳐주는 함수
-void zero(DLL *stack_1, DLL *stack_2 ); // 소수점의 자릿수를 맞춰주는 함수
+void zero(DLL *stack_1, DLL *stack_2); // 소수점의 자릿수를 맞춰주는 함수
 int insertAt(DLL *stack_3, int index, Node *newnode); // 특정 index에 노드를 삽입하는 함수
 void copy_1(DLL *list_1 , DLL *list_3); //list_1에 list_3의 노드를 복사해주는 함수
 int deleteAt(DLL *list, int index);
@@ -75,7 +75,6 @@ int main(){
 
   cal(list_1,list_2);  // 계산된 list_2
   reverse(list_2,list_3);
-
   for (int i = 1 ; i < a; i++){
     list_1 -> swh = 0;
     list_2 -> swh = 0;
@@ -186,7 +185,6 @@ void zero(DLL *stack_1, DLL *stack_2 ){ // 소수점과 자연수의 자릿수�
       curr_1 = curr_1->next ;
     }
   }
-
 
   stack_1 -> size_2 = c; // 자연수 자릿수 저장
   stack_2 -> size_2 = d;
@@ -574,6 +572,7 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
     stack_2 -> swh = 1;
   }
 
+
    if( operator == 1 ){
     Node *curr_1 = stack_1 ->head;
     Node *curr_2 = stack_2 ->head;
@@ -630,7 +629,6 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
       int d = stack_1 ->size_1; // 소수점 자릿수를 저장
 
       if ( d > 0) insertAt(stack_3,d,newnode('.')); // 소수점 자릿수가 0보다 큰경우, . 을 삽입
-      //if ( stack_1 -> swh == 1 ) stack_3 -> swh = stack_1 -> swh;
       if ( stack_1 -> swh == 1) append(stack_3,newnode('-'));// -3 5 - 인경우
       stack_1 ->swh = 0;
       stack_2 ->swh = 0;
@@ -647,7 +645,7 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
      else curr_1 = curr_1 ->next;
    }
    while(1){ // 노드 끝까지 보냄
-     if (curr_2->next == NULL) break;
+     if (curr_2 -> next == NULL) break;
      else curr_2 = curr_2 ->next;
    }
      int count = 0 ;
@@ -682,8 +680,6 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
      }
 
      int d = stack_1 ->size_1;
-     //printf("\n stack_3 -> swh : %d\n",stack_3 -> swh);
-     //printf("\nd : %d\n",d);
      if ( d > 0) insertAt(stack_3,d,newnode('.'));
      Node *curr_3 = stack_3 -> head;
      /////// 자연수자리의 쓸데없는 0 삭제 ex -09라고 출력되는데 -9로 바꿔줌
@@ -691,17 +687,22 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
        if (curr_3 -> next ==NULL) break;
        else curr_3 = curr_3 ->next;
      }
+
      while(1){
-       if (curr_3 -> val != '0') break;
+       if (curr_3 -> prev == NULL) break;
+       if (curr_3 -> val != '0' ) break;
        else {
-         curr_3 = curr_3 -> prev;
-         curr_3 ->next = NULL;
+         if (curr_3 -> prev -> val != '.')
+         {
+           curr_3 = curr_3 -> prev;
+           curr_3 ->next = NULL;
+         }
+         else break;
        }
      }
-     //printf("\nstack_3\n");
-     //print(stack_3);
      ////// stack_3의 값이 -일경우
      if ( stack_1 -> swh == 1) append(stack_3,newnode('-'));
+     else if ( stack_1 -> swh == 2 ) append(stack_3,newnode('-'));
      stack_1 ->swh = 0;
      stack_2 ->swh = 0;
      stack_3 ->swh = 0;
@@ -866,50 +867,47 @@ void getnumber(DLL *list){
   while(1){
     temp = getchar();
     if(temp == '\n') break;
-    if ( temp == '+'|| temp == '-'|| temp == '*'|| temp == '/' ){
-      if (count == 0){   //기존에서 추가한 부분
-        if ( temp == '+') {
-          temp = getchar();
-          count ++;
-        }
-        if ( temp == '-') {
-          //printf("\nplay\n");
-          list-> swh = 2;
-          temp = getchar();
-          count ++;
-        }
-    		if ( temp == '*') {
-    			printf("ERROR: Worng Input !");
-          exit(1);
-    		}
-
+    if ( temp == '+'|| temp == '-'|| temp == '*'|| temp == '/' )
+    {
+      if (count == 0)
+      {   //기존에서 추가한 부분
+          if ( temp == '+') {
+            temp = getchar();
+            count ++;
+          }
+          if ( temp == '-') {
+            list-> swh = 2;
+            temp = getchar();
+            count ++;
+          }
+      		if ( temp == '*') {
+      			printf("ERROR: Worng Input !");
+            exit(1);
+      		}
       }
-      if (temp == '+' || temp == '-' || temp == '*') list->i = list->i + 1; // 추가한 부분
       append(list,newnode(temp));
       count ++;
       /////////////// 이쪽은 좀더 손보야할듯 (3+3) +3  은 안됨
       /*
       temp = getchar();
-      if (temp == '.' || temp == '+' || temp == '-' || temp == '*' || temp == '/') {
-         printf("ERROR: Worng Input !");
-         exit(1);
+
+      while(1)
+      {
+        if (temp == ' ')
+        {
+          temp = getchar();
+          count++;
+        }
+        else break;
       }
-      else if ( isblank(temp) ) count ++;
-      else if ( isalpha(temp) ) {
-        printf(" Wrong Input ! ");
-        exit(1);
-      }
-      else if ( isdigit(temp) ){
-        append(list,newnode(temp));
-        count ++;
-      }
-      else {
-        printf(" Wrong Input ! ");
+
+      if (temp == '.' || temp == '+' || temp == '-' || temp == '*' || temp == '/')
+      {
+        printf("ERROR: Worng Input !");
         exit(1);
       }
       */
       //////////////
-
     }
     else if (temp == '.' || temp =='('|| temp ==')') append(list,newnode(temp));
     else if ( isblank(temp) ) count ++;
