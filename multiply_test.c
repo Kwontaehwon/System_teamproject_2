@@ -572,294 +572,298 @@ void cal(DLL *list,DLL *stack_3){ // list는 후위표기법으로 바뀐식,sta
     stack_2 -> swh = 1;
   }
 
-
-   if( operator == 1 ){
-    Node *curr_1 = stack_1 ->head;
-    Node *curr_2 = stack_2 ->head;
-     while(1){ // 노드 끝까지 보냄
-      if (curr_1->next == NULL) break;
-      else curr_1 = curr_1 ->next;
-    }
-    while(1){ // 노드 끝까지 보냄
-      if (curr_2->next == NULL) break;
-      else curr_2 = curr_2 ->next;
-    }
-    int count = 0 ; //올림을 할때 쓰기위함
-    int a  = curr_1 -> val - 48 ;
-    int b  = curr_2 -> val - 48 ;
-    int c ;
-     while (1){ // + 계산시작
-      // 수가 끝낫을경우 0으로 처리
-       if ( curr_1 ->val == '.') {
-        curr_1 = curr_1 -> prev;
-      }
-      if ( curr_2 -> val == '.') {
-        curr_2 = curr_2 -> prev;
-      }
-       a = curr_1 -> val - 48 ;
-      b = curr_2 -> val - 48 ;
-       c = a+b;
-       if (count == 1){
-        c++;
-        count = 0 ;
-        if ( c >= 10){
-          c = c-10;
-          count = 1;
+  switch( operator )
+  {
+     case 1 :  // +계산
+     {
+        Node *curr_1 = stack_1 ->head;
+        Node *curr_2 = stack_2 ->head;
+         while(1){ // 노드 끝까지 보냄
+          if (curr_1->next == NULL) break;
+          else curr_1 = curr_1 ->next;
         }
-      }
-      else {
-        if ( c >= 10 ){
-          c = c - 10;
-          count = 1;
+        while(1){ // 노드 끝까지 보냄
+          if (curr_2->next == NULL) break;
+          else curr_2 = curr_2 ->next;
         }
-      }
-      if ( curr_1 != NULL) curr_1 = curr_1 ->prev;
-      if ( curr_2 != NULL) curr_2 = curr_2 ->prev;
-
-      c = c + 48;
-      append(stack_3,newnode(c));
-      if ( curr_1 == NULL && curr_2 == NULL){
-        if ( count == 1){ // 수를 더해서 자리수가 올라갈경우
-          append(stack_3,newnode('1'));
-          count = 0 ;
+        int count = 0 ; //올림을 할때 쓰기위함
+        int a  = curr_1 -> val - 48 ;
+        int b  = curr_2 -> val - 48 ;
+        int c ;
+         while (1){ // + 계산시작
+          // 수가 끝낫을경우 0으로 처리
+           if ( curr_1 ->val == '.') {
+            curr_1 = curr_1 -> prev;
           }
-         break;
-        }
-      } // while문
-      int d = stack_1 ->size_1; // 소수점 자릿수를 저장
+          if ( curr_2 -> val == '.') {
+            curr_2 = curr_2 -> prev;
+          }
+           a = curr_1 -> val - 48 ;
+          b = curr_2 -> val - 48 ;
+           c = a+b;
+           if (count == 1){
+            c++;
+            count = 0 ;
+            if ( c >= 10){
+              c = c-10;
+              count = 1;
+            }
+          }
+          else {
+            if ( c >= 10 ){
+              c = c - 10;
+              count = 1;
+            }
+          }
+          if ( curr_1 != NULL) curr_1 = curr_1 ->prev;
+          if ( curr_2 != NULL) curr_2 = curr_2 ->prev;
 
-      if ( d > 0) insertAt(stack_3,d,newnode('.')); // 소수점 자릿수가 0보다 큰경우, . 을 삽입
-      if ( stack_1 -> swh == 1) append(stack_3,newnode('-'));// -3 5 - 인경우
-      stack_1 ->swh = 0;
-      stack_2 ->swh = 0;
-      stack_3 ->swh = 0;
+          c = c + 48;
+          append(stack_3,newnode(c));
+          if ( curr_1 == NULL && curr_2 == NULL){
+            if ( count == 1){ // 수를 더해서 자리수가 올라갈경우
+              append(stack_3,newnode('1'));
+              count = 0 ;
+              }
+             break;
+            }
+          } // while문
+          int d = stack_1 ->size_1; // 소수점 자릿수를 저장
+
+          if ( d > 0) insertAt(stack_3,d,newnode('.')); // 소수점 자릿수가 0보다 큰경우, . 을 삽입
+          if ( stack_1 -> swh == 1) append(stack_3,newnode('-'));// -3 5 - 인경우
+          stack_1 ->swh = 0;
+          stack_2 ->swh = 0;
+          stack_3 ->swh = 0;
+        break;
     } // if +문에 걸림
 
-  ////    -계산
-  else if( operator == 2 ){
-
-     Node *curr_1 = stack_1 ->head;
-     Node *curr_2 = stack_2 ->head;
-   while(1){ // 노드 끝까지 보냄
-     if (curr_1->next == NULL) break;
-     else curr_1 = curr_1 ->next;
-   }
-   while(1){ // 노드 끝까지 보냄
-     if (curr_2 -> next == NULL) break;
-     else curr_2 = curr_2 ->next;
-   }
-     int count = 0 ;
-     int a = curr_1 -> val - 48 ;
-     int b = curr_2 -> val - 48 ;
-     int c ;
-   while(1){
-     if ( curr_1 ->val == '.') {
-       curr_1 = curr_1 -> prev;
-     }
-     if ( curr_2 -> val == '.') {
-       curr_2 = curr_2 -> prev;
-     }
-     a = curr_1 -> val - 48 ;
-     b = curr_2 -> val - 48 ;
-     c = a-b;
-     if (count == 1){
-       c--;
-       count = 0;
-     }
-     if (c< 0){
-       c = c+10;
-       count = 1;
-     }
-     if ( curr_1 != NULL) curr_1 = curr_1 ->prev;
-     if ( curr_2 != NULL) curr_2 = curr_2 ->prev;
-     c = c + 48;
-     append(stack_3,newnode(c));
-     if ( curr_1 == NULL && curr_2 == NULL){
-         break;
+    case 2 :  ////  -계산
+    {
+         Node *curr_1 = stack_1 ->head;
+         Node *curr_2 = stack_2 ->head;
+       while(1){ // 노드 끝까지 보냄
+         if (curr_1->next == NULL) break;
+         else curr_1 = curr_1 ->next;
         }
-     }
-
-     int d = stack_1 ->size_1;
-     if ( d > 0) insertAt(stack_3,d,newnode('.'));
-     Node *curr_3 = stack_3 -> head;
-     /////// 자연수자리의 쓸데없는 0 삭제 ex -09라고 출력되는데 -9로 바꿔줌
-     while(1){
-       if (curr_3 -> next ==NULL) break;
-       else curr_3 = curr_3 ->next;
-     }
-
-     while(1){
-       if (curr_3 -> prev == NULL) break;
-       if (curr_3 -> val != '0' ) break;
-       else {
-         if (curr_3 -> prev -> val != '.')
-         {
-           curr_3 = curr_3 -> prev;
-           curr_3 ->next = NULL;
+       while(1){ // 노드 끝까지 보냄
+         if (curr_2 -> next == NULL) break;
+         else curr_2 = curr_2 ->next;
+        }
+         int count = 0 ;
+         int a = curr_1 -> val - 48 ;
+         int b = curr_2 -> val - 48 ;
+         int c ;
+       while(1){
+         if ( curr_1 ->val == '.') {
+           curr_1 = curr_1 -> prev;
          }
-         else break;
-       }
-     }
-     ////// stack_3의 값이 -일경우
-     if ( stack_1 -> swh == 1) append(stack_3,newnode('-'));
-     else if ( stack_1 -> swh == 2 ) append(stack_3,newnode('-'));
-     stack_1 ->swh = 0;
-     stack_2 ->swh = 0;
-     stack_3 ->swh = 0;
-
-   }
-
-  /////// *계산
-  else if(operator == 3){
-    Node *curr_1 = stack_1 -> head;
-    Node *curr_2 = stack_2 -> head;
-
-    if(stack_1->size_1 > 0)// 소수점의 인덱스 파악후 삭제
-    {
-      int a = 0;
-      while(1)
-      {
-        if(curr_1->val =='.')
-        {
-          deleteAt(stack_1,a);
-          deleteAt(stack_2,a);
-          break;
-        }
-        curr_1 = curr_1 ->next;
-        a++;
-      }
-    }
-    DLL *stack_4 = newDLL(); //값을 임시 저장해둘 DLL
-    DLL *stack_5 = newDLL(); //+계산을 후위표기법으로 하기위해 만든 DLL
-    if( stack_3 -> head == NULL ) append(stack_3,newnode('0')); // 답을 저장할 stack_3,처음일경우 NULL이기 때문에 0 을 넣어줌
-    int count = 0 ; // 앞수 자릿수
-    int count_1 = 0 ; // 뒷수 자릿수
-    int count_2 = 0 ; // 곱하기 올림을 위해서
-    while(1) // 앞수 노드 끝까지 보냄
-    {
-      if (curr_1->next == NULL) break;
-      else curr_1 = curr_1 ->next;
-    }
-
-    while(1) // 뒷수 노드 끝까지 보냄
-    {
-      if (curr_2->next == NULL) break;
-      else curr_2 = curr_2 ->next;
-    }
-
-    while(1) //더하기 계산
-    {
-        Node *curr_4 = stack_4 -> head; //값을 임시 저장해둘 DLL
-        Node *curr_3 = stack_3 -> head; //+계산을 후위표기법으로 하기위해 만든 DLL
-        int a = curr_1 ->val - 48;
-        int b = curr_2 ->val - 48;
-        int c = a*b;
-        c = c + count_2 ; // 그전에 계산한값에서 올려주는 수가 있을떼
-        count_2 = 0; //올려줬으므로 초기화
-        while(1) // 곱한값이 10의 자리를 넘어가는 경우
-        {
-            if ( c < 10) break;
-            else
-            {
-              c = c - 10;
-              count_2 ++;
+         if ( curr_2 -> val == '.') {
+           curr_2 = curr_2 -> prev;
+         }
+         a = curr_1 -> val - 48 ;
+         b = curr_2 -> val - 48 ;
+         c = a-b;
+         if (count == 1){
+           c--;
+           count = 0;
+         }
+         if (c< 0){
+           c = c+10;
+           count = 1;
+         }
+         if ( curr_1 != NULL) curr_1 = curr_1 ->prev;
+         if ( curr_2 != NULL) curr_2 = curr_2 ->prev;
+         c = c + 48;
+         append(stack_3,newnode(c));
+         if ( curr_1 == NULL && curr_2 == NULL){
+             break;
             }
-        }
-        c = c + 48 ;
-        append(stack_4,newnode(c));
-        for (int i = 0 ; i < count ; i++) // 곱하는 앞수 자릿수가 일의자리가 아닌 십의자리 백의자리일떄,
-        {
-          insertAt(stack_4,0,newnode('0'));
-        }
+         }
+         int d = stack_1 ->size_1;
+         if ( d > 0) insertAt(stack_3,d,newnode('.'));
+         Node *curr_3 = stack_3 -> head;
+         /////// 자연수자리의 쓸데없는 0 삭제 ex -09라고 출력되는데 -9로 바꿔줌
+         while(1){
+           if (curr_3 -> next ==NULL) break;
+           else curr_3 = curr_3 ->next;
+         }
+         while(1){
+           if (curr_3 -> prev == NULL) break;
+           if (curr_3 -> val != '0' ) break;
+           else {
+             if (curr_3 -> prev -> val != '.')
+             {
+               curr_3 = curr_3 -> prev;
+               curr_3 ->next = NULL;
+             }
+             else break;
+           }
+         }
+         ////// stack_3의 값이 -일경우
+         if ( stack_1 -> swh == 1) append(stack_3,newnode('-'));
+         else if ( stack_1 -> swh == 2 ) append(stack_3,newnode('-'));
+         stack_1 ->swh = 0;
+         stack_2 ->swh = 0;
+         stack_3 ->swh = 0;
+         break;
+     }
 
-      reverse(stack_4,stack_5); //reverse한 값을 stack_5에 넣어줌
-      delete_all(stack_4);
-      append(stack_5,newnode(' '));  // 숫자 띄어쓰기 숫자
+    case  3 :  // *계산
+    {
+        Node *curr_1 = stack_1 -> head;
+        Node *curr_2 = stack_2 -> head;
 
-      while(1) // stack_3의 값을 stack_5(후위표기법) 에 저장, stack_3은 답을 저장하는 DLL
+      if(stack_1->size_1 > 0)// 소수점의 인덱스 파악후 삭제
       {
-        append(stack_5,newnode(curr_3-> val));
-        if(curr_3 -> next == NULL)
+        int a = 0;
+        while(1)
         {
-          break;
+          if(curr_1->val =='.')
+          {
+            deleteAt(stack_1,a);
+            deleteAt(stack_2,a);
+            break;
+          }
+          curr_1 = curr_1 ->next;
+          a++;
         }
-        curr_3 = curr_3 -> next;
       }
-        append(stack_5,newnode(' '));// 숫자 띄어쓰기 숫자 띄어쓰기
-        append(stack_5,newnode('+'));// 숫자 띄어쓰기 숫자 띄어쓰기 +
-        delete_all(stack_3); // stack_3의 값을 stack_5에 넣어주었으므로 비워줌
-        cal(stack_5,stack_3); // 후위표기법으로 바뀐 stack_4을 전환한 식을 계산해주고 stack_3에 저장
-        delete_all(stack_5); //stack_5은 끝났으므로 비워줌
-        reverse(stack_3,stack_4); // stack_3 reverse를 해주기 위한 stack_4
-        delete_all(stack_3); //stack_3에 계산된 값을 넣어주기위해서 비워줌
-        copy_1(stack_3,stack_4); // reverse한 값을 다시 stack_3에 넣어줌
-        delete_all(stack_4); // stack_4를 비워줌
+      DLL *stack_4 = newDLL(); //값을 임시 저장해둘 DLL
+      DLL *stack_5 = newDLL(); //+계산을 후위표기법으로 하기위해 만든 DLL
+      if( stack_3 -> head == NULL ) append(stack_3,newnode('0')); // 답을 저장할 stack_3,처음일경우 NULL이기 때문에 0 을 넣어줌
+      int count = 0 ; // 앞수 자릿수
+      int count_1 = 0 ; // 뒷수 자릿수
+      int count_2 = 0 ; // 곱하기 올림을 위해서
+      while(1) // 앞수 노드 끝까지 보냄
+      {
+        if (curr_1->next == NULL) break;
+        else curr_1 = curr_1 ->next;
+      }
 
-        int swh_1 = 0 ; // curr_1(뒷수)을 맨뒤로 초기화 시켜주었다는 스위치, 앞수가 끝까지 연산되었기때문
-        if( curr_1 ->prev == NULL)
+      while(1) // 뒷수 노드 끝까지 보냄
+      {
+        if (curr_2->next == NULL) break;
+        else curr_2 = curr_2 ->next;
+      }
+
+      while(1) //더하기 계산
+      {
+          Node *curr_4 = stack_4 -> head; //값을 임시 저장해둘 DLL
+          Node *curr_3 = stack_3 -> head; //+계산을 후위표기법으로 하기위해 만든 DLL
+          int a = curr_1 ->val - 48;
+          int b = curr_2 ->val - 48;
+          int c = a*b;
+          c = c + count_2 ; // 그전에 계산한값에서 올려주는 수가 있을떼
+          count_2 = 0; //올려줬으므로 초기화
+          while(1) // 곱한값이 10의 자리를 넘어가는 경우
+          {
+              if ( c < 10) break;
+              else
+              {
+                c = c - 10;
+                count_2 ++;
+              }
+          }
+          c = c + 48 ;
+          append(stack_4,newnode(c));
+          for (int i = 0 ; i < count ; i++) // 곱하는 앞수 자릿수가 일의자리가 아닌 십의자리 백의자리일떄,
+          {
+            insertAt(stack_4,0,newnode('0'));
+          }
+
+        reverse(stack_4,stack_5); //reverse한 값을 stack_5에 넣어줌
+        delete_all(stack_4);
+        append(stack_5,newnode(' '));  // 숫자 띄어쓰기 숫자
+
+        while(1) // stack_3의 값을 stack_5(후위표기법) 에 저장, stack_3은 답을 저장하는 DLL
         {
-          count_1 ++; // 뒷수가 옮겨졌으니 0의 자릿수가 하나더 들어남
-          count = count_1;
-
-          if(curr_2 -> prev == NULL)
+          append(stack_5,newnode(curr_3-> val));
+          if(curr_3 -> next == NULL)
           {
-            break; // 최종적으로 while을 나가는 식,즉 * 연산이 끝남
+            break;
           }
-          curr_2 = curr_2 -> prev; // 일의자리 다음에 십의자리를 더함
-          while(1) //curr_1을 맨뒤로 초기화시켜줌
-          {
-            swh_1 = 1; // curr_1을 맨뒤로 초기화 시켜주었다는 스위치
-            if(curr_1 -> next == NULL) break;;
-            curr_1 = curr_1 -> next;
-            if( c > 0 ) count_2 = count_2 * 10; // 56*67예제처리,넘어가는수가 있을때 뒷수의 연산이 끝났을떄
-          }
+          curr_3 = curr_3 -> next;
         }
-        if ( swh_1 != 1) // curr_1을 맨뒤로 초기화시켜주었기 때문에 할필요가없을때 를 위함.
+          append(stack_5,newnode(' '));// 숫자 띄어쓰기 숫자 띄어쓰기
+          append(stack_5,newnode('+'));// 숫자 띄어쓰기 숫자 띄어쓰기 +
+          delete_all(stack_3); // stack_3의 값을 stack_5에 넣어주었으므로 비워줌
+          cal(stack_5,stack_3); // 후위표기법으로 바뀐 stack_4을 전환한 식을 계산해주고 stack_3에 저장
+          delete_all(stack_5); //stack_5은 끝났으므로 비워줌
+          reverse(stack_3,stack_4); // stack_3 reverse를 해주기 위한 stack_4
+          delete_all(stack_3); //stack_3에 계산된 값을 넣어주기위해서 비워줌
+          copy_1(stack_3,stack_4); // reverse한 값을 다시 stack_3에 넣어줌
+          delete_all(stack_4); // stack_4를 비워줌
+
+          int swh_1 = 0 ; // curr_1(뒷수)을 맨뒤로 초기화 시켜주었다는 스위치, 앞수가 끝까지 연산되었기때문
+          if( curr_1 ->prev == NULL)
+          {
+            count_1 ++; // 뒷수가 옮겨졌으니 0의 자릿수가 하나더 들어남
+            count = count_1;
+
+            if(curr_2 -> prev == NULL)
+            {
+              break; // 최종적으로 while을 나가는 식,즉 * 연산이 끝남
+            }
+            curr_2 = curr_2 -> prev; // 일의자리 다음에 십의자리를 더함
+            while(1) //curr_1을 맨뒤로 초기화시켜줌
+            {
+              swh_1 = 1; // curr_1을 맨뒤로 초기화 시켜주었다는 스위치
+              if(curr_1 -> next == NULL) break;;
+              curr_1 = curr_1 -> next;
+              if( c > 0 ) count_2 = count_2 * 10; // 56*67예제처리,넘어가는수가 있을때 뒷수의 연산이 끝났을떄
+            }
+          }
+          if ( swh_1 != 1) // curr_1을 맨뒤로 초기화시켜주었기 때문에 할필요가없을때 를 위함.
+          {
+            curr_1 = curr_1 ->prev;
+            count++;
+            swh_1 = 0;
+          }
+      }  // 더하기 계산부분 끝남
+
+
+      // 자릿숫커지는 경우 ex 55*3 = 165  여기에서의 1을 표현해주기 위함
+      if (count_2 > 0)
+      {
+
+        count_2 = count_2 + 48;
+        insertAt(stack_3,0,newnode(count_2));
+      }
+      int a = stack_1 ->size_1; // 소수점의 갯수
+      if(a  > 0) // 마지막으로 소수점 삽입
+      {
+        int count = 1 ; // curr_3의 사이즈
+        Node *curr_3 = stack_3->head ;
+        while(1)
         {
-          curr_1 = curr_1 ->prev;
+          if (curr_3 -> next == NULL) break;
+          curr_3 = curr_3 ->next;
           count++;
-          swh_1 = 0;
         }
-    }  // 더하기 계산부분 끝남
-
-
-    // 자릿숫커지는 경우 ex 55*3 = 165  여기에서의 1을 표현해주기 위함
-    if (count_2 > 0)
-    {
-
-      count_2 = count_2 + 48;
-      insertAt(stack_3,0,newnode(count_2));
-    }
-    int a = stack_1 ->size_1; // 소수점의 갯수
-    if(a  > 0) // 마지막으로 소수점 삽입
-    {
-      int count = 1 ; // curr_3의 사이즈
-      Node *curr_3 = stack_3->head ;
-      while(1)
-      {
-        if (curr_3 -> next == NULL) break;
-        curr_3 = curr_3 ->next;
-        count++;
+        a = a*2; //소수점이 있을경우 , stack_1소수점의 수와 stack_2가 곱해지기 때문에 *2를 해준거임. ex) 1.1 * 1.1 = 1.21 > 소수점 자릿수 늘어남.
+        insertAt(stack_3,count-a,newnode('.'));
       }
-      a = a*2; //소수점이 있을경우 , stack_1소수점의 수와 stack_2가 곱해지기 때문에 *2를 해준거임. ex) 1.1 * 1.1 = 1.21 > 소수점 자릿수 늘어남.
-      insertAt(stack_3,count-a,newnode('.'));
-    }
-    if( stack_1 ->swh == 1) insertAt(stack_3,0,newnode('-')); //앞수가 -얐을경우
-    while(1) // 필요없는 0의 자릿수를 지워주기위함.
-    {
-      if(stack_3->head -> val =='0' && stack_3->head->next == NULL) break; // 답인 0 인 경우를 위함
-      if(stack_3 -> head -> val != '0') break;
-      if(stack_3 -> head -> val == '0' && stack_3 -> head -> next -> val != '.')
+      if( stack_1 ->swh == 1) insertAt(stack_3,0,newnode('-')); //앞수가 -얐을경우
+      while(1) // 필요없는 0의 자릿수를 지워주기위함.
       {
-        deleteAt(stack_3,0);
+        if(stack_3->head -> val =='0' && stack_3->head->next == NULL) break; // 답인 0 인 경우를 위함
+        if(stack_3 -> head -> val != '0') break;
+        if(stack_3 -> head -> val == '0' && stack_3 -> head -> next -> val != '.')
+        {
+          deleteAt(stack_3,0);
+        }
       }
+      delete_all(stack_4);
+      reverse(stack_3,stack_4); // 최종적으로 나오는 값이 reverse된 값이여야 하기때문에 reverse를 해줌.
+      delete_all(stack_3);
+      copy_1(stack_3,stack_4);
+      delete_all(stack_4);
+      break;
     }
-    delete_all(stack_4);
-    reverse(stack_3,stack_4); // 최종적으로 나오는 값이 reverse된 값이여야 하기때문에 reverse를 해줌.
-    delete_all(stack_3);
-    copy_1(stack_3,stack_4);
-    delete_all(stack_4);
-  }
+    default :
+      break;
+  }// switch문에 걸림
 }
 void getnumber(DLL *list){
   int count = 0 ; //몇번 돌았나, -3+5 예제 처리를 위함.
